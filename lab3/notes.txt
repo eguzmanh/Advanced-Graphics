@@ -1,0 +1,143 @@
+USING MATRIX STACK:
+        // gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals));
+
+		// bind textures
+		// gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		// gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		// gl.glEnableVertexAttribArray(1);
+
+		// gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+		// gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		// gl.glEnableVertexAttribArray(1);
+
+		
+		// push view matrix
+		// mvStack.pushMatrix();
+		// vMat = camera.getViewMatrix();
+		// mvStack.set(vMat);
+		
+
+		// // push pyr1 matrix
+		// mvStack.pushMatrix();
+		// Vector3f pyr1Location = pyr1.getLocation();
+		// mvStack.translate(pyr1Location.x(), pyr1Location.y(), pyr1Location.z());
+
+
+		// mvStack.pushMatrix();
+		// mMat.rotateXYZ(-0.45f, 0.61f, 0.0f);
+		// gl.glUniformMatrix4fv(mvLoc, 1, false, mvStack.get(vals));
+		// gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		// gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		// gl.glEnableVertexAttribArray(0);
+		// gl.glDrawArrays(GL_TRIANGLES, 0, 18); 
+		
+		// // gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		// // gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		// // gl.glEnableVertexAttribArray(1);
+
+		// gl.glActiveTexture(GL_TEXTURE0);
+		// gl.glBindTexture(GL_TEXTURE_2D, brickTexture);
+		// mvStack.popMatrix();
+	
+
+
+		// // pyr2 matrix
+		// mvStack.pushMatrix();		
+		// Vector3f pyr2Location = pyr2.getLocation();
+		// mvStack.translate(pyr2Location.x()*2f, pyr2Location.y(), pyr2Location.z());
+
+
+		// mvStack.pushMatrix();
+		// // mMat.rotateXYZ(-0.45f, 0.61f, 0.0f);
+		// gl.glUniformMatrix4fv(mvLoc, 1, false, mvStack.get(vals));
+		// gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+		// gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		// gl.glEnableVertexAttribArray(0);
+		// gl.glDrawArrays(GL_TRIANGLES, 0, 18); 
+
+		// // gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+		// // gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		// // gl.glEnableVertexAttribArray(1);
+
+		// gl.glActiveTexture(GL_TEXTURE0);
+		// gl.glBindTexture(GL_TEXTURE_2D, iceTexture);
+		// mvStack.popMatrix();
+
+		// // // bind texture
+		// // gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		// // gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		// // gl.glEnableVertexAttribArray(1);
+
+		// // gl.glActiveTexture(GL_TEXTURE0);
+		// // gl.glBindTexture(GL_TEXTURE_2D, brickTexture);
+
+
+
+
+		// // cube1  matrix
+		// mvStack.pushMatrix();
+		// Vector3f cube1Loc = cube1.getLocation();
+		// mvStack.translate(cube1Loc.x(), cube1Loc.y(), cube1Loc.z());		
+		
+		
+		// mvStack.pushMatrix();
+		// mvStack.rotate(cube1.getRotAmnt(), 0.0f, 1.0f, 0.0f);
+		// gl.glUniformMatrix4fv(mvLoc, 1, false, mvStack.get(vals));
+		// gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
+		// gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		// gl.glEnableVertexAttribArray(0);
+		// gl.glDrawArrays(GL_TRIANGLES, 0, 36);
+		
+		// // gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+		// // gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		// // gl.glEnableVertexAttribArray(1);
+
+		// gl.glActiveTexture(GL_TEXTURE0);
+		// gl.glBindTexture(GL_TEXTURE_2D, brickTexture);
+		// mvStack.popMatrix();  
+
+		
+		// // cube2 matrix
+		// mvStack.pushMatrix();
+		// Vector3f cube2Loc = cube2.getLocation();
+		// mvStack.translate(-cube2Loc.x(), cube2Loc.y(), cube2Loc.z());
+
+		
+		// mvStack.pushMatrix();
+		// mvStack.rotate(cube2.getRotAmnt(), 0.0f, 0.0f, 1.0f);
+		// mvStack.scale(0.5f, 0.5f, 0.5f);
+		// // mvStack.rotate((float)speed, 0.0f, 2.0f, 0.0f);
+		// gl.glUniformMatrix4fv(mvLoc, 1, false, mvStack.get(vals));
+		// gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+		// gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		// gl.glEnableVertexAttribArray(0);
+		// gl.glDrawArrays(GL_TRIANGLES, 0, 36);
+		
+		// gl.glActiveTexture(GL_TEXTURE0);
+		// gl.glBindTexture(GL_TEXTURE_2D, iceTexture);
+		// mvStack.popMatrix();  
+		
+		
+		// mvStack.popMatrix();
+		// mvStack.popMatrix();
+		// mvStack.popMatrix();
+		// mvStack.popMatrix(); 
+		// mvStack.popMatrix(); 
+
+		
+		
+		// cube1.updateLocation((float)speed);
+
+		// mMat.identity();
+		// mMat.translate(pyrLocX, pyrLocY, pyrLocZ);
+		// mMat.rotateXYZ(-0.45f, 0.61f, 0.0f);
+
+		// mvMat.identity();
+		// mvMat.mul(vMat);
+		// mvMat.mul(mMat);
+
+		// gl.glUniformMatrix4fv(mvLoc, 1, false, mvMat.get(vals));
+
+		// gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		// gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		// gl.glEnableVertexAttribArray(0);

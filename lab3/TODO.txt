@@ -1,0 +1,12 @@
+The following items are going to be needed for lighting and assignmemnt rewire,ents 
+
+th:
+
+Create a uniform varable in the shader that flags when an object has a texture vs not
+
+Add material lighting properties to objects that don't have a texture
+Ignore material propertes when objects include a texture
+
+Give the option of different material
+  - possibly create more uniform variables that Java code can trigger in order to use different materials
+
