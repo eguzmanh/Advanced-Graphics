@@ -7,7 +7,7 @@ public class Mars extends ImportedWorldObject {
 
     public Mars(String shapeType, ImportedModel marsObj) {
         super(shapeType, marsObj);
-        setLocation(0f, 0f, 0f);
+        setLocation(1.5f, -0.1f, 2f);
         xDir = 1.0f;
     }
 

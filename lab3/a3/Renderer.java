@@ -35,10 +35,20 @@ public class Renderer {
 	float[] lightSpecular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
 		
 	// gold material
-	float[] matAmb = Utils.goldAmbient();
-	float[] matDif = Utils.goldDiffuse();
-	float[] matSpe = Utils.goldSpecular();
-	float matShi = Utils.goldShininess();
+	float[] matAmb;
+	float[] matDif;
+	float[] matSpe;
+	float matShi;
+
+    float[] goldMatAmb = Utils.goldAmbient();
+	float[] goldMatDif = Utils.goldDiffuse();
+	float[] goldMatSpe = Utils.goldSpecular();
+    float goldMatShi = Utils.goldShininess();
+
+    float[] amethystMatAmb = Utils.amethystAmbient();
+	float[] amethystMatDif = Utils.amethystDiffuse();
+	float[] amethystMatSpe = Utils.amethystSpecular();
+    float amethystMatShi = Utils.amethystShininess();
     
     private Vector3f initialLightLoc, currentLightPos;
     private float[] lightPos;
@@ -58,8 +68,23 @@ public class Renderer {
         currVboIndex = 0;
         vals = Buffers.newDirectFloatBuffer(16);
         shaders = new HashMap<String, Integer>();
+        setAmethystMaterial();
     }
 
+
+    public void setAmethystMaterial() {
+        matAmb = Utils.amethystAmbient();
+        matDif = Utils.amethystDiffuse();
+        matSpe = Utils.amethystSpecular();
+        matShi = Utils.amethystShininess();
+    }
+
+    public void setGoldMaterial() {
+        matAmb = Utils.goldAmbient();
+        matDif = Utils.goldDiffuse();
+        matSpe = Utils.goldSpecular();
+        matShi = Utils.goldShininess();
+    }
 
     // ****************************** Initialization ******************************
     public void createShaders() {
@@ -288,7 +313,7 @@ public class Renderer {
     public void setupLights(float elapsedSpeed) {
         amt += elapsedSpeed * 0.5f;
         currentLightPos.set(initialLightLoc);
-        // currentLightPos.rotateAxis((float)Math.toRadians(amt), 0.0f, 0.0f, 1.0f);
+        currentLightPos.rotateAxis((float)Math.toRadians(amt), 0.0f, 0.0f, 1.0f);
         installLights();
         
     }

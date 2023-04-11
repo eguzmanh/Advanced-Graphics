@@ -385,4 +385,10 @@ public class Utils
 	public static float[] bronzeDiffuse()  { return (new float [] {0.7140f,  0.4284f, 0.1814f, 1} ); }
 	public static float[] bronzeSpecular() { return (new float [] {0.3936f,  0.2719f, 0.1667f, 1} ); }
 	public static float bronzeShininess()  { return 25.6f; }
+
+	// found online 
+	public static float[] amethystAmbient()  { return (new float [] {0.596f, 0.247f, 0.678f, 1} ); } // a deep purple color with a hint of red.
+	public static float[] amethystDiffuse()  { return (new float [] {0.8f, 0.8f, 0.8f, 1} ); } // a bright white color for the reflective highlights.
+	public static float[] amethystSpecular() { return (new float [] {0.3f, 0.3f, 0.3f, 1} ); } // a darker shade of purple to simulate ambient lighting.
+	public static float amethystShininess()  { return 128f; } // a high value for a smooth, polished appearance.
 }

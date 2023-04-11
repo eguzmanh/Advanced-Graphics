@@ -12,7 +12,7 @@ public class Camera {
     private Matrix4f viewMatrix, viewRotationMatrix, viewTranslationMatrix;
     
     public Camera() {	
-		location = new Vector3f(0.0f, 1.5f, 15f);
+		location = new Vector3f(0.0f, 1.5f, 8f);
 		u = new Vector3f(1.0f, 0.0f, 0.0f);
 		v = new Vector3f(0.0f, 1.0f, 0.0f);
 		n = new Vector3f(0.0f, 0.0f, -1.0f);
@@ -73,7 +73,7 @@ public class Camera {
 		Vector3f oldPosition, fwdDirection, newLocation;
 		oldPosition = getLocation(); 
 		fwdDirection = getN(); // N vector 
-		fwdDirection.mul(newSpeed*3f);
+		fwdDirection.mul(newSpeed*6f);
 		newLocation = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z()); 
 		setLocation(newLocation); 
 	}

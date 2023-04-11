@@ -162,15 +162,15 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		// ! Unused
 		iceTexture = Utils.loadTexture("assets/textures/ice.jpg");
-		floralSheetTexture = Utils.loadTexture("assets/textures/floral_sheet.png");
-		drawerDoorTexture = Utils.loadTexture("assets/textures/Drawer_Door.jpg");
+		// floralSheetTexture = Utils.loadTexture("assets/textures/floral_sheet.png");
+		// drawerDoorTexture = Utils.loadTexture("assets/textures/Drawer_Door.jpg");
 	}
 
 	private void buildWorldObjects() {	
 		skyboxCube = new Cube("cube");
 		brickPyramid = new Pyramid("pyramid", pyramidObj);
 		icePyramid = new Pyramid("pyramid", pyramidObj);
-		artsyCube = new Cube("cube");
+		// artsyCube = new Cube("cube");
 		mars = new Mars("sphere", marsObj);
 		dol = new Dolphin("dolphin", dolphinObj);
 	}
@@ -178,7 +178,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 	private void bindWorldObjects() {
 		renderer.bindWorldObject(skyboxCube, skyboxCube.getVertices());
 		renderer.bindTexturedWorldObject(dol, dol.getVertices(), dol.getTextureCoordinates(), dol.getNormals());
-		renderer.bindTexturedWorldObject(artsyCube, artsyCube.getVertices(), artsyCube.getArtsyTextureCoordinates(), artsyCube.getNormals());
+		// renderer.bindTexturedWorldObject(artsyCube, artsyCube.getVertices(), artsyCube.getArtsyTextureCoordinates(), artsyCube.getNormals());
 		renderer.bindTexturedWorldObject(mars, mars.getVertices(), mars.getTextureCoordinates(), mars.getNormals());
 		renderer.bindTexturedWorldObject(brickPyramid, brickPyramid.getVertices(), brickPyramid.getTextureCoordinates(), brickPyramid.getNormals());
 		renderer.bindTexturedWorldObject(icePyramid, icePyramid.getVertices(), icePyramid.getTextureCoordinates(), icePyramid.getNormals());
@@ -199,6 +199,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		// * View Matrix from Camera
 		renderer.useMainShader();
+		renderer.setupLights(elapsedTimeOffset);
 		renderWorldObjects();		
 
 
@@ -217,9 +218,9 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		// * Dolphin Object
 		updateDolphin();
 		
-		mMat.identity();
+		// mMat.identity();
 		// * Artsy Cube Object
-		updateArtsyCube();
+		// updateArtsyCube();
 
 		updateObjectMatrixStack();
 		
@@ -234,7 +235,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		// mMat.mul(vMat);
 		// mMat.mul(mMat);
 		// amt += elapsedTime * 0.03f;
-		renderer.setupLights(elapsedTimeOffset);
+		// renderer.setupLights(elapsedTimeOffset);
 		mMat.invert(invTrMat);
 		invTrMat.transpose(invTrMat);
 		renderer.setMVPUniformVars(mMat, vMat, pMat, invTrMat);
@@ -251,9 +252,9 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		mStack.pushMatrix();
 
 		// operate on the mars object
-		// mStack.pushMatrix();
+		mStack.pushMatrix();
 		updateMars();
-		// mStack.popMatrix();
+		mStack.popMatrix();
 
 		// * Ice Pyramid Object   -- child of mars
 		mStack.pushMatrix();
@@ -277,14 +278,15 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		x = currObjLoc.x();
 		y = currObjLoc.y();
-		z = currObjLoc.z() + elapsedTimeOffset * dol.getZDirection();
+		// z = currObjLoc.z() + elapsedTimeOffset * dol.getZDirection();
+		z = currObjLoc.z();
 
 		dol.setLocation(x, y, z);
 		
 		mMat.translation(x, y, z);
 		mMat.scale(1.5f, 1.5f, 1.5f);
 		
-		if (dol.getZDirection() < 0) mMat.rotate(135, 0.0f, 1.0f, 0.0f);
+		// if (dol.getZDirection() < 0) mMat.rotate(135, 0.0f, 1.0f, 0.0f);
 
 		updateMMatrix();
 
@@ -296,7 +298,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		currObjLoc = artsyCube.getLocation();
 		x = currObjLoc.x();
-		y = currObjLoc.y() + elapsedTimeOffset * artsyCube.getYDir();
+		// y = currObjLoc.y() + elapsedTimeOffset * artsyCube.getYDir();
+		y = currObjLoc.y();
 		z = currObjLoc.z();
 		artsyCube.setLocation(x,y,z);
 
@@ -312,18 +315,18 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		mars.update(elapsedTimeOffset);
 		currObjLoc = mars.getLocation();
 
-		// x = currObjLoc.x() + elapsedTimeOffset * mars.getXDirection();
-		x = currObjLoc.x();
+		x = currObjLoc.x() + elapsedTimeOffset * mars.getXDirection();
+		// x = currObjLoc.x();
 		y = currObjLoc.y();
 		z = currObjLoc.z();
 
-		// mars.setLocation(x, y, z);
+		mars.setLocation(x, y, z);
 
 		mStack.translate(x,y,z);	
 		mStack.scale(0.5f, 0.5f, 0.5f);	
 		
-		renderer.setupLights(elapsedTimeOffset);
-		mMat.invert(invTrMat);
+		// renderer.setupLights(elapsedTimeOffset);
+		mStack.invert(invTrMat);
 		invTrMat.transpose(invTrMat);
 		renderer.setMVStackUniformVar(vMat, mStack, invTrMat);
 
@@ -334,18 +337,22 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		icePyramid.update(elapsedTimeOffset); // pyramid 1
 		currObjLoc = icePyramid.getLocation();
 
-		x = currObjLoc.x() + elapsedTimeOffset;
+		// x = currObjLoc.x() + elapsedTimeOffset;
+		x = currObjLoc.x();
 		y = currObjLoc.y();
-		z = currObjLoc.z() + elapsedTimeOffset;
+		// z = currObjLoc.z() + elapsedTimeOffset;
+		z = currObjLoc.z();
 
 		icePyramid.setLocation(x,y,z);
 		currObjLoc = icePyramid.getLocation();
 		
-		mStack.translate(-(float)Math.sin(x)*5.0f,y,(float)Math.cos(z)*5.0f);
+		mStack.translate(-(float)Math.sin(x)*10.0f,y*10f  ,(float)Math.cos(z)*2.0f);
+		// mStack.translate(x*5f,y,z);
 		mStack.rotate(icePyramid.getRotationAngle(), 0.0f, 1.0f, 0.0f);
 		
+		renderer.setGoldMaterial();
 		renderer.setupLights(elapsedTimeOffset);
-		mMat.invert(invTrMat);
+		mStack.invert(invTrMat);
 		invTrMat.transpose(invTrMat);
 		renderer.setMVStackUniformVar(vMat, mStack, invTrMat);
 
@@ -356,18 +363,22 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		brickPyramid.update(elapsedTimeOffset); // pyramid 2
 		currObjLoc = brickPyramid.getLocation();
 
-		x = currObjLoc.x() + elapsedTimeOffset;
+		// x = currObjLoc.x() + elapsedTimeOffset;
+		x = currObjLoc.x();
 		y = currObjLoc.y();
-		z = currObjLoc.z() + elapsedTimeOffset;
+		// z = currObjLoc.z() + elapsedTimeOffset;
+		z = currObjLoc.z();
 		
 		brickPyramid.setLocation(x,y,z);
 		currObjLoc = brickPyramid.getLocation();
 
-		mStack.translate((float)Math.sin(x)*5.0f,y,(float)Math.cos(z)*5.0f);
+		mStack.translate((float)Math.sin(x)*10.0f,y*10f ,(float)Math.cos(z)*2.0f);
+		// mStack.translate(x,y,z);
 		mStack.rotate(brickPyramid.getRotationAngle(), 0.0f, -1.0f, 0.0f);
 
+		renderer.setAmethystMaterial();
 		renderer.setupLights(elapsedTimeOffset);
-		mMat.invert(invTrMat);
+		mStack.invert(invTrMat);
 		invTrMat.transpose(invTrMat);
 		renderer.setMVStackUniformVar(vMat, mStack, invTrMat);
 

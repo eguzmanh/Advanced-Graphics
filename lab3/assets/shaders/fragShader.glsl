@@ -72,9 +72,10 @@ void main(void)
 	} else if (hasTexture == 1) {
 		ambient = ((globalAmbient) + (light.ambient)).xyz;
 		diffuse = light.diffuse.xyz * max(cosTheta,0.0);
-		specular = light.specular.xyz * pow(max(cosPhi,0.0), 3.0);
+		specular = light.specular.xyz * pow(max(cosPhi,0.0), 1.0);
 		tcolor = texture(samp, tc);
-		fragColor = 0.5*tcolor + .5*lcolor;
+		lcolor = vec4(tcolor.xyz * (ambient + diffuse + specular), 1.0);
+		fragColor = lcolor;
 	}
 
 	
