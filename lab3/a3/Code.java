@@ -59,7 +59,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 
 	private int brickTexture, iceTexture, artsyTexture, dolTexture, floralSheetTexture, 
-				drawerDoorTexture, marsDiffuseTexture, skyboxTexture;
+				drawerDoorTexture, marsDiffuseTexture, skyboxTexture, boatTexture, waterTankTexture;
 	
 	private Pyramid brickPyramid;
 	private Pyramid icePyramid;
@@ -67,8 +67,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	private Cube skyboxCube;
 	private Mars mars;
 	private Dolphin dol;
+	private Boat boat;
+	private WaterTank waterTank;
 
-	private ImportedModel marsObj, dolphinObj, pyramidObj;
+	private ImportedModel marsObj, dolphinObj, pyramidObj, boatObj, waterTankObj;
 
 	private Vector3f currObjLoc;
 	private float x,y,z;
@@ -162,6 +164,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		marsObj = new ImportedModel("assets/models/mars.obj");
 		dolphinObj = new ImportedModel("assets/models/dolphinHighPoly.obj");
 		pyramidObj = new ImportedModel("assets/models/pyr.obj");
+		boatObj = new ImportedModel("assets/models/MarlowBoat.obj");
+		waterTankObj = new ImportedModel("assets/models/waterTank.obj");
 	}
 
 	// refer to readme for source explanations
@@ -173,6 +177,9 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 		skyboxTexture = Utils.loadCubeMap("assets/cubeMaps/LakeIslands");
 		renderer.enableCubeMap();
+		
+		boatTexture = Utils.loadTexture("assets/textures/boat/HullTexture.png");
+		waterTankTexture = Utils.loadTexture("assets/textures/water-tank/colour.png");
 
 		// ! Unused
 		iceTexture = Utils.loadTexture("assets/textures/ice.jpg");
@@ -187,11 +194,17 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		// artsyCube = new Cube("cube");
 		mars = new Mars("sphere", marsObj);
 		dol = new Dolphin("dolphin", dolphinObj);
+
+		boat = new Boat("boat", boatObj);
+		waterTank = new WaterTank("waterTank", waterTankObj);
 	}
 
 	private void bindWorldObjects() {
 		renderer.bindWorldObject(skyboxCube, skyboxCube.getVertices());
 		renderer.bindTexturedWorldObject(dol, dol.getVertices(), dol.getTextureCoordinates(), dol.getNormals());
+		renderer.bindTexturedWorldObject(boat, boat.getVertices(), boat.getTextureCoordinates(), boat.getNormals());
+
+		renderer.bindTexturedWorldObject(waterTank, waterTank.getVertices(), waterTank.getTextureCoordinates(), waterTank.getNormals());
 		// renderer.bindTexturedWorldObject(artsyCube, artsyCube.getVertices(), artsyCube.getArtsyTextureCoordinates(), artsyCube.getNormals());
 		renderer.bindTexturedWorldObject(mars, mars.getVertices(), mars.getTextureCoordinates(), mars.getNormals());
 		renderer.bindTexturedWorldObject(brickPyramid, brickPyramid.getVertices(), brickPyramid.getTextureCoordinates(), brickPyramid.getNormals());
@@ -244,6 +257,12 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 		// * Dolphin Object
 		updateDolphin();
+
+		mMat.identity();
+		updateBoat();
+
+		mMat.identity();
+		updateWaterTank();
 		
 		// mMat.identity();
 		// * Artsy Cube Object
@@ -273,7 +292,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		// mStack.pushMatrix();
 		// mStack.set(vMat);
 		// mStack.translate(camera.getLocation().x(),camera.getLocation().y(),camera.getLocation().z());
-
 
 		// * Mars Object -- parent
 		mStack.pushMatrix();
@@ -318,6 +336,48 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		updateMMatrix();
 
 		renderer.renderWorldObject(dol.getVBOIndex(), dol.getNumVertices(), dol.getVBOTxIndex(), dolTexture, dol.getVBONIndex());
+	}
+
+	private void updateBoat() {
+		boat.update(elapsedTimeOffset);
+		currObjLoc = boat.getLocation();
+
+		x = currObjLoc.x();
+		y = currObjLoc.y();
+		// z = currObjLoc.z() + elapsedTimeOffset * boat.getZDirection();
+		z = currObjLoc.z();
+
+		boat.setLocation(x, y, z);
+		
+		mMat.translation(x, y, z);
+		mMat.scale(0.3f, 0.3f, 0.3f);
+		
+		// if (boat.getZDirection() < 0) mMat.rotate(135, 0.0f, 1.0f, 0.0f);
+
+		updateMMatrix();
+
+		renderer.renderWorldObject(boat.getVBOIndex(), boat.getNumVertices(), boat.getVBOTxIndex(), boatTexture, boat.getVBONIndex());
+	}
+
+	private void updateWaterTank() {
+		waterTank.update(elapsedTimeOffset);
+		currObjLoc = waterTank.getLocation();
+
+		x = currObjLoc.x();
+		y = currObjLoc.y();
+		// z = currObjLoc.z() + elapsedTimeOffset * waterTank.getZDirection();
+		z = currObjLoc.z();
+
+		waterTank.setLocation(x, y, z);
+		
+		mMat.translation(x, y, z);
+		mMat.scale(0.1f, 0.1f, 0.1f);
+		
+		// if (boat.getZDirection() < 0) mMat.rotate(135, 0.0f, 1.0f, 0.0f);
+
+		updateMMatrix();
+
+		renderer.renderWorldObject(waterTank.getVBOIndex(), waterTank.getNumVertices(), waterTank.getVBOTxIndex(), waterTankTexture, waterTank.getVBONIndex());
 	}
 
 	private void updateArtsyCube() {
@@ -516,11 +576,9 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		if(zoomFactor > 1.0f) { renderer.addCurrentLightPositionY(-zoomFactor); }  // moves light down
 		System.out.println(zoomFactor);
 
-        // Update camera position based on the mouse wheel rotation
-        // ...
-
-        myCanvas.display();
+        // myCanvas.display();
     }
+
 
 	private int lastX, lastY, lastVarsSet = 0;
 
@@ -539,17 +597,12 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
         int dx = x - lastX;
         int dy = y - lastY;
 
-		float xMovement = (float) dx / myCanvas.getWidth() * 0.1f;		
-    	float zMovement = (float) dy / myCanvas.getHeight() * 0.1f;
-
-        // Update object position based on the mouse movement
-        // ...
-		renderer.lightPositionAdd(dx, 0, dy);
+		renderer.lightPositionAdd(dx*0.1f, 0, dy*-0.1f);
         // Remember the current mouse position
         lastX = x;
         lastY = y;
 
-        myCanvas.display();
+        // myCanvas.display();
     }
 
 	@Override
