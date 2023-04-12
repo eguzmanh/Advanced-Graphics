@@ -3,7 +3,6 @@
 out vec4 axisLineColor;
 
 uniform mat4 v_matrix;  // this is actually just the view matrix
-uniform mat4 m_matrix;  // this is actually just the view matrix
 uniform mat4 p_matrix;
 
 void main(void) {	
@@ -24,5 +23,5 @@ void main(void) {
         axisLineColor = vec4(0.0, 0.0, 1.0, 1.0);
     }
 
-	gl_Position = p_matrix * m_matrix * v_matrix * vertices[gl_VertexID];
+	gl_Position = p_matrix * v_matrix * vertices[gl_VertexID];
 } 

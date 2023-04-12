@@ -24,9 +24,9 @@ public class Renderer {
     private int currVboIndex;
     private int mLoc, vLoc, pLoc, nLoc; 
 
-    private int globalAmbLoc, ambLoc, diffLoc, specLoc, posLoc, mambLoc, mdiffLoc, mspecLoc, mshiLoc;
+    private int lightLoc, globalAmbLoc, ambLoc, diffLoc, specLoc, posLoc, mambLoc, mdiffLoc, mspecLoc, mshiLoc;
 
-    private int hasTexture; // does not need initialization because it will be set in code
+    private int hasTexture, glTextureStatus; // does not need initialization because it will be set in code
 
     private int lightStatus;
 
@@ -57,7 +57,7 @@ public class Renderer {
     private Vector3f initialLightLoc, currentLightPos;
     private float[] lightPos;
     
-    private FloatBuffer vals;
+    private FloatBuffer vals16f, vals3f;
 
     private float amt;
 
@@ -67,12 +67,13 @@ public class Renderer {
         lightPos = new float[3];
 
         initialLightLoc = new Vector3f(0.0f, 10.0f, 0.0f);
-        currentLightPos = new Vector3f();
+        currentLightPos = initialLightLoc;
         // lightStatus = true;
         isLightOn = 1;
 
         currVboIndex = 0;
-        vals = Buffers.newDirectFloatBuffer(16);
+        vals16f = Buffers.newDirectFloatBuffer(16);
+        vals3f = Buffers.newDirectFloatBuffer(3);
         shaders = new HashMap<String, Integer>();
         setAmethystMaterial();
     }
@@ -135,6 +136,7 @@ public class Renderer {
         shaders.put("mainShader", Utils.createShaderProgram("assets/shaders/vertShader.glsl", "assets/shaders/fragShader.glsl"));
         shaders.put("axisLineShader", Utils.createShaderProgram("assets/shaders/lineVertShader.glsl", "assets/shaders/lineFragShader.glsl"));
         shaders.put("cubeMapShader", Utils.createShaderProgram("assets/shaders/cubeMapVertShader.glsl", "assets/shaders/cubeMapFragShader.glsl"));
+        shaders.put("lightDotShader", Utils.createShaderProgram("assets/shaders/lightDotVertShader.glsl", "assets/shaders/lightDotFragShader.glsl"));
     }
 
     private void setUpVertexArrayObjects() {
@@ -154,7 +156,6 @@ public class Renderer {
         gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[currVboIndex++]);
 		FloatBuffer buf = Buffers.newDirectFloatBuffer(points);
 		gl.glBufferData(GL_ARRAY_BUFFER, buf.limit()*4, buf, GL_STATIC_DRAW);
-
         // currVboIndex += 1;
         // System.out.println("currVboIndex: " + currVboIndex);
     }
@@ -171,7 +172,7 @@ public class Renderer {
 		nLoc = gl.glGetUniformLocation(shaders.get("mainShader"), "norm_matrix");
 
         // include a texture flag in order to use the correct material light properties
-        hasTexture = gl.glGetUniformLocation(shaders.get("mainShader"), "hasTexture");
+        glTextureStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "textureStatus");
         lightStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "lightStatus");
     }
 
@@ -188,9 +189,21 @@ public class Renderer {
         // * Generate the axis line with a hard coded vertex file
         gl.glUseProgram(shaders.get("axisLineShader"));
 
-        mLoc = gl.glGetUniformLocation(shaders.get("axisLineShader"), "m_matrix");
+        // mLoc = gl.glGetUniformLocation(shaders.get("axisLineShader"), "m_matrix");
 		vLoc = gl.glGetUniformLocation(shaders.get("axisLineShader"), "v_matrix");
 		pLoc = gl.glGetUniformLocation(shaders.get("axisLineShader"), "p_matrix");
+    }
+
+    public void useLightDotShader() {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        // * Generate the axis line with a hard coded vertex file
+        gl.glUseProgram(shaders.get("lightDotShader"));
+
+        // mLoc = gl.glGetUniformLocation(shaders.get("axisLineShader"), "m_matrix");
+        lightLoc = gl.glGetUniformLocation(shaders.get("lightDotShader"), "light_position");
+		vLoc = gl.glGetUniformLocation(shaders.get("lightDotShader"), "v_matrix");
+		pLoc = gl.glGetUniformLocation(shaders.get("lightDotShader"), "p_matrix");
     }
 
     public void enableCubeMap() {
@@ -198,7 +211,7 @@ public class Renderer {
         gl.glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     }
     
-    public void drawCubeMap(int vboObjId,int numVertices, int texture) {
+    public void renderCubeMap(int vboObjId,int numVertices, int texture) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
         gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
 		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
@@ -218,11 +231,35 @@ public class Renderer {
 		
     }
     
-    /** Bind objects with a texture */
-	public void drawWorldObject(int vboObjId,int numVertices, int vboTxId, int texture, int vboNId) {
+    public void renderAxisLines(Matrix4f vMat, Matrix4f pMat) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
 
-        gl.glUniform1i(hasTexture, 1);
+        // pass in view as mvLoc to display the lines at the origin
+        // gl.glUniformMatrix4fv(mLoc, 1, false, mMat.get(vals16f));
+        
+        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals16f));
+        gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals16f));
+
+        gl.glDrawArrays(GL_LINES, 0, 6);
+	}
+
+    public void renderLightDot(Matrix4f vMat, Matrix4f pMat) {
+        if(isLightOn == 0) return;
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        gl.glUniform3fv(lightLoc, 1, currentLightPos.get(vals3f));
+        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals16f));
+        gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals16f));
+
+        gl.glPointSize(50.0f);
+        gl.glDrawArrays(GL_POINTS, 0, 1);
+    }
+    
+    /** Bind objects with a texture */
+	public void renderWorldObject(int vboObjId,int numVertices, int vboTxId, int texture, int vboNId) {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        gl.glUniform1i(glTextureStatus, 1);
 
 		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
 		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
@@ -246,10 +283,10 @@ public class Renderer {
 	}
 
 	/** Bind objects without a texture */
-	public void drawWorldObject(int vboObjId, int numVertices, int vboNId) {
+	public void renderWorldObject(int vboObjId, int numVertices, int vboNId) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
 
-        gl.glUniform1i(hasTexture, 0);
+        gl.glUniform1i(glTextureStatus, 0);
 
 		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
 		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
@@ -262,50 +299,39 @@ public class Renderer {
 		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
 	}
 
-    public void renderAxisLines(Matrix4f vMat, Matrix4f mMat, Matrix4f pMat) {
-        GL4 gl = (GL4) GLContext.getCurrentGL();
-
-        // pass in view as mvLoc to display the lines at the origin
-        gl.glUniformMatrix4fv(mLoc, 1, false, mMat.get(vals));
-        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals));
-        gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals));
-
-        gl.glDrawArrays(GL_LINES, 0, 6);
-	}
-
     public void setMVPUniformVars(Matrix4f mMat, Matrix4f vMat, Matrix4f pMat, Matrix4f nMat) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
-        // gl.glUniformMatrix4fv(mvLoc, 1, false, mvMat.get(vals));
-        gl.glUniformMatrix4fv(mLoc, 1, false, mMat.get(vals));
-        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals));
-        gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals));
-        gl.glUniformMatrix4fv(nLoc, 1, false, nMat.get(vals));
+        // gl.glUniformMatrix4fv(mvLoc, 1, false, mvMat.get(vals16f));
+        gl.glUniformMatrix4fv(mLoc, 1, false, mMat.get(vals16f));
+        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals16f));
+        gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals16f));
+        gl.glUniformMatrix4fv(nLoc, 1, false, nMat.get(vals16f));
     }
 
     public void setMVUniformVar(Matrix4f mMat,Matrix4f vMat, Matrix4f nMat) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
-        gl.glUniformMatrix4fv(mLoc, 1, false, mMat.get(vals));
-        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals));
-        gl.glUniformMatrix4fv(nLoc, 1, false, nMat.get(vals));
+        gl.glUniformMatrix4fv(mLoc, 1, false, mMat.get(vals16f));
+        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals16f));
+        gl.glUniformMatrix4fv(nLoc, 1, false, nMat.get(vals16f));
     }
 
     public void setVPUniformVar(Matrix4f vMat, Matrix4f pMat) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
-        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals));
-        gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals));
+        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals16f));
+        gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals16f));
     }
     
 
     public void setMVStackUniformVar(Matrix4f vMat, Matrix4fStack mStack, Matrix4f nMat) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
-        gl.glUniformMatrix4fv(mLoc, 1, false, mStack.get(vals));
-        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals));
-        gl.glUniformMatrix4fv(nLoc, 1, false, nMat.get(vals));
+        gl.glUniformMatrix4fv(mLoc, 1, false, mStack.get(vals16f));
+        gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals16f));
+        gl.glUniformMatrix4fv(nLoc, 1, false, nMat.get(vals16f));
     }
 
     public void setPUniformVar(Matrix4f pMat) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
-        gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals));
+        gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals16f));
     }
 
     public void clearGL() {
@@ -316,18 +342,48 @@ public class Renderer {
     }
 
     public int getCurrVBOIndex() { return currVboIndex; }
-
+    
+    // private dir created for a direction change
+    private int dir = 1;
     public void setupLights(float elapsedSpeed) {
         if (isLightOn == 0) { return; } 
-        amt += elapsedSpeed * 0.5f;
-        currentLightPos.set(initialLightLoc);
-        currentLightPos.rotateAxis((float)Math.toRadians(amt), 0.0f, 0.0f, 1.0f);
+        amt = elapsedSpeed;
+        // System.out.prin
+        
+        // float x = currentLightPos.x;
+        // float y = currentLightPos.y;
+        // float z = currentLightPos.z;
+        // float x = currentLightPos.x + amt * dir;
+        // float y = currentLightPos.y + amt * dir;
+        // float z = currentLightPos.z + amt * dir;
+        // float currVal = z; // set to x, y, z for direction changes
+        
+        // if(currVal >= 10.0f) dir = -1;
+        // if(currVal <= 0.0f) dir = 1;
+
+        // currentLightPos.set(currentLightPos);
         installLights();
+    }
+
+    public float getCurrentLightX() { return currentLightPos.x; }
+    public float getCurrentLightY() { return currentLightPos.y; }
+    public float getCurrentLightZ() { return currentLightPos.z; }
+    public void setCurrentLightPositionX(float x) { currentLightPos.set(x, currentLightPos.y, currentLightPos.z); }
+    public void setCurrentLightPositionY(float y) { currentLightPos.set(currentLightPos.x, y, currentLightPos.z); }
+    public void setCurrentLightPositionZ(float z) { currentLightPos.set(currentLightPos.x, currentLightPos.y, z); }
+
+    public void lightPositionAdd(float x, float y, float z) { currentLightPos.add(x,y,z); }
+    public void addCurrentLightPositionY(float y) { currentLightPos.add(0f,y,0f); }
+
+    public void setCurrentLightPositionXY(float x, float y) { currentLightPos.set(x, y, currentLightPos.z); }
+    public void setCurrentLightPositionXZ(float x, float z) { currentLightPos.set(x, currentLightPos.y, z); }
+
+    public void setCurrentLightPositionXYZ() {
+
     }
 
     public void setLightStatus() {
         GL4 gl = (GL4) GLContext.getCurrentGL();
-        System.out.println("IsLightON: " + isLightOn);
         gl.glUniform1i(lightStatus, isLightOn);
     }
     
@@ -346,9 +402,12 @@ public class Renderer {
     }
 
     private void installLights()
-	{	GL4 gl = (GL4) GLContext.getCurrentGL();
+	{	
+        if (isLightOn == 0) return;
+
+        GL4 gl = (GL4) GLContext.getCurrentGL();
 		
-		lightPos[0]=currentLightPos.x(); lightPos[1]=currentLightPos.y(); lightPos[2]=currentLightPos.z();
+		lightPos[0]=currentLightPos.x; lightPos[1]=currentLightPos.y; lightPos[2]=currentLightPos.z;
 		
 		// get the locations of the light and material fields in the shader
 		globalAmbLoc = gl.glGetUniformLocation(shaders.get("mainShader"), "globalAmbient");

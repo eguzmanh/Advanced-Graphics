@@ -33,7 +33,7 @@ uniform mat4 v_matrix;
 uniform mat4 p_matrix;
 uniform mat4 norm_matrix;
 
-uniform int hasTexture;
+uniform int textureStatus;
 
 void main(void)
 {	varyingVertPos = (m_matrix * vec4(vertPos,1.0)).xyz;

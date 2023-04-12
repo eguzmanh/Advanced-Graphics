@@ -220,7 +220,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		updateMVMatrix();
 	
-		renderer.drawWorldObject(brickPyramid.getVBOIndex(), brickPyramid.getNumVertices(), brickPyramid.getVBOTxIndex(), brickTexture);
+		renderer.renderWorldObject(brickPyramid.getVBOIndex(), brickPyramid.getNumVertices(), brickPyramid.getVBOTxIndex(), brickTexture);
 	}
 
 	private void updateIcePyramid() {
@@ -232,7 +232,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		updateMVMatrix();
 	
-		renderer.drawWorldObject(icePyramid.getVBOIndex(), icePyramid.getNumVertices(), icePyramid.getVBOTxIndex(), iceTexture);
+		renderer.renderWorldObject(icePyramid.getVBOIndex(), icePyramid.getNumVertices(), icePyramid.getVBOTxIndex(), iceTexture);
 	}
 
 	private void updateArtsyCube() {
@@ -244,7 +244,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		updateMVMatrix();
 
-		renderer.drawWorldObject(artsyCube.getVBOIndex(), artsyCube.getNumVertices(), artsyCube.getVBOTxIndex(), artsyTexture);
+		renderer.renderWorldObject(artsyCube.getVBOIndex(), artsyCube.getNumVertices(), artsyCube.getVBOTxIndex(), artsyTexture);
 	}
 
 	private void updateMars() {
@@ -257,7 +257,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		updateMVMatrix();
 
-		renderer.drawWorldObject(mars.getVBOIndex(), mars.getNumVertices(), mars.getVBOTxIndex(), marsDiffuseTexture);
+		renderer.renderWorldObject(mars.getVBOIndex(), mars.getNumVertices(), mars.getVBOTxIndex(), marsDiffuseTexture);
 	}
 
 	private void updateDolphin() {
@@ -271,7 +271,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		updateMVMatrix();
 
-		renderer.drawWorldObject(dol.getVBOIndex(), dol.getNumVertices(), dol.getVBOTxIndex(), dolTexture);
+		renderer.renderWorldObject(dol.getVBOIndex(), dol.getNumVertices(), dol.getVBOTxIndex(), dolTexture);
 	}
 
 	private void renderAxisLines() {

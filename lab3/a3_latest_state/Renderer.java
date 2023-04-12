@@ -120,7 +120,7 @@ public class Renderer {
     }
     
     /** Bind objects with a texture */
-	public void drawWorldObject(int vboObjId,int numVertices, int vboTxId, int texture) {
+	public void renderWorldObject(int vboObjId,int numVertices, int vboTxId, int texture) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
 
 		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
@@ -141,7 +141,7 @@ public class Renderer {
 	}
 
 	/** Bind objects without a texture */
-	public void drawWorldObject(int vboObjId, int numVertices) {
+	public void renderWorldObject(int vboObjId, int numVertices) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
 
 		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);

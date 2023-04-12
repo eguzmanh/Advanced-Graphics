@@ -34,7 +34,7 @@ uniform mat4 v_matrix;
 uniform mat4 p_matrix;
 uniform mat4 norm_matrix;
 
-uniform int hasTexture; // 0 for no, 1 for yes
+uniform int textureStatus; // 0 for no, 1 for yes
 uniform int lightStatus; // 0 for off, 1 for on
 
 
@@ -63,7 +63,7 @@ void lightsOnColoring(void) {
 		float cosPhi = dot(H,N);
 		// compute ADS contributions (per pixel):
 
-		if(hasTexture == 0) { 
+		if(textureStatus == 0) { 
 
 			ambient = ((globalAmbient * material.ambient) + (light.ambient * material.ambient)).xyz;
 			diffuse = light.diffuse.xyz * material.diffuse.xyz * max(cosTheta,0.0);
@@ -72,7 +72,7 @@ void lightsOnColoring(void) {
 			fragColor = lcolor;
 
 		 } 
-		else if (hasTexture == 1) { 
+		else if (textureStatus == 1) { 
 
 			ambient = ((globalAmbient) + (light.ambient)).xyz;
 			diffuse = light.diffuse.xyz * max(cosTheta,0.0);
@@ -85,8 +85,8 @@ void lightsOnColoring(void) {
 }
 
 void lightsOffColoring(void){
-	if (hasTexture == 0) { fragColor = vec4(1.0, 0.0, 0.0, 1.0); } 
-		else if (hasTexture == 1) { fragColor = texture(samp, tc); }
+	if (textureStatus == 0) { fragColor = vec4(1.0, 0.0, 0.0, 1.0); } 
+		else if (textureStatus == 1) { fragColor = texture(samp, tc); }
 }
 
 void main(void) {	

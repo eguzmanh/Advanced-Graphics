@@ -262,7 +262,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		updateMVMatrix();
 
-		renderer.drawWorldObject(dol.getVBOIndex(), dol.getNumVertices(), dol.getVBOTxIndex(), dolTexture);
+		renderer.renderWorldObject(dol.getVBOIndex(), dol.getNumVertices(), dol.getVBOTxIndex(), dolTexture);
 	}
 
 	private void updateArtsyCube() {
@@ -279,7 +279,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		updateMVMatrix();
 
-		renderer.drawWorldObject(artsyCube.getVBOIndex(), artsyCube.getNumVertices(), artsyCube.getVBOTxIndex(), artsyTexture);
+		renderer.renderWorldObject(artsyCube.getVBOIndex(), artsyCube.getNumVertices(), artsyCube.getVBOTxIndex(), artsyTexture);
 	}
 
 	private void updateMars() {
@@ -296,7 +296,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		mvStack.scale(0.5f, 0.5f, 0.5f);	
 		
 		renderer.setMUniformVar(mvStack);
-		renderer.drawWorldObject(mars.getVBOIndex(), mars.getNumVertices(), mars.getVBOTxIndex(), marsDiffuseTexture);
+		renderer.renderWorldObject(mars.getVBOIndex(), mars.getNumVertices(), mars.getVBOTxIndex(), marsDiffuseTexture);
 	}
 
 	private void updateIcePyramid() {
@@ -314,7 +314,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		mvStack.rotate(icePyramid.getRotationAngle(), 0.0f, 1.0f, 0.0f);
 		
 		renderer.setMUniformVar(mvStack);
-		renderer.drawWorldObject(icePyramid.getVBOIndex(), icePyramid.getNumVertices());
+		renderer.renderWorldObject(icePyramid.getVBOIndex(), icePyramid.getNumVertices());
 	}
 
 	private void updateBrickPyramid() {
@@ -332,7 +332,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		mvStack.rotate(brickPyramid.getRotationAngle(), 0.0f, -1.0f, 0.0f);
 
 		renderer.setMUniformVar(mvStack);
-		renderer.drawWorldObject(brickPyramid.getVBOIndex(), brickPyramid.getNumVertices());
+		renderer.renderWorldObject(brickPyramid.getVBOIndex(), brickPyramid.getNumVertices());
 
 	}
 

@@ -20,11 +20,21 @@ import com.jogamp.opengl.util.texture.*;
 import com.jogamp.common.nio.Buffers;
 import org.joml.*;
 
+import java.awt.Point;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 
-public class Code extends JFrame implements GLEventListener, KeyListener {	
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseAdapter;
+
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+
+
+public class Code extends JFrame implements GLEventListener, KeyListener, MouseMotionListener, MouseWheelListener  {	
 	private GLCanvas myCanvas;
+	
 	private Camera camera;
 	private Renderer renderer;
 
@@ -121,8 +131,14 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		myCanvas = new GLCanvas();
 		myCanvas.addGLEventListener(this);
 		myCanvas.addKeyListener(this);
-    
-		this.add(myCanvas);
+		myCanvas.addMouseWheelListener(this);
+		myCanvas.addMouseMotionListener(this);
+		// myCanvas.addMouseMotionListener(new MouseHandler());
+		// myCanvas.addMouseListener(new MouseHandler());
+        // myCanvas.addMouseMotionListener(new MouseHandler());
+		// getContentPane()addMouseListener(new MouseHandler());
+		// getContentPane().getComponent(0).addMouseMotionListener(new MouseHandler());
+		getContentPane().add(myCanvas);
 		this.setVisible(true);
 	}
 
@@ -196,21 +212,33 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		renderer.useCubeMapShader();
 		renderSkybox();
 		
+		renderer.useLineShader();
+		renderAxisLines();
+
+		renderer.useLightDotShader();
+		renderLightDot();
+
 		// * View Matrix from Camera
 		renderer.useMainShader();
 		renderer.setLightStatus();
 		renderer.setupLights(elapsedTimeOffset);
 		renderWorldObjects();		
-
-
-		renderer.useLineShader();
-		renderAxisLines();
 	}
 
 	private void renderSkybox() {
 		renderer.setVPUniformVar(vMat, pMat);
-		renderer.drawCubeMap(skyboxCube.getVBOIndex(), skyboxCube.getNumVertices(), skyboxTexture);
+		renderer.renderCubeMap(skyboxCube.getVBOIndex(), skyboxCube.getNumVertices(), skyboxTexture);
 	}
+
+	private void renderAxisLines() {
+		if (displayAxisLines) {
+			renderer.renderAxisLines(vMat, pMat);
+		}
+	}
+	private void renderLightDot() {
+		renderer.renderLightDot(vMat, pMat);
+	}
+	
 
 	private void renderWorldObjects() {
 
@@ -289,7 +317,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		updateMMatrix();
 
-		renderer.drawWorldObject(dol.getVBOIndex(), dol.getNumVertices(), dol.getVBOTxIndex(), dolTexture, dol.getVBONIndex());
+		renderer.renderWorldObject(dol.getVBOIndex(), dol.getNumVertices(), dol.getVBOTxIndex(), dolTexture, dol.getVBONIndex());
 	}
 
 	private void updateArtsyCube() {
@@ -307,7 +335,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 		updateMMatrix();
 
-		renderer.drawWorldObject(artsyCube.getVBOIndex(), artsyCube.getNumVertices(), artsyCube.getVBOTxIndex(), artsyTexture, artsyCube.getVBONIndex());
+		renderer.renderWorldObject(artsyCube.getVBOIndex(), artsyCube.getNumVertices(), artsyCube.getVBOTxIndex(), artsyTexture, artsyCube.getVBONIndex());
 	}
 
 	private void updateMars() {
@@ -329,7 +357,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		invTrMat.transpose(invTrMat);
 		renderer.setMVStackUniformVar(vMat, mStack, invTrMat);
 
-		renderer.drawWorldObject(mars.getVBOIndex(), mars.getNumVertices(), mars.getVBOTxIndex(), marsDiffuseTexture, mars.getVBONIndex());
+		renderer.renderWorldObject(mars.getVBOIndex(), mars.getNumVertices(), mars.getVBOTxIndex(), marsDiffuseTexture, mars.getVBONIndex());
 	}
 
 	private void updateIcePyramid() {
@@ -355,7 +383,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		invTrMat.transpose(invTrMat);
 		renderer.setMVStackUniformVar(vMat, mStack, invTrMat);
 
-		renderer.drawWorldObject(icePyramid.getVBOIndex(), icePyramid.getNumVertices(), icePyramid.getVBONIndex());
+		renderer.renderWorldObject(icePyramid.getVBOIndex(), icePyramid.getNumVertices(), icePyramid.getVBONIndex());
 	}
 
 	private void updateBrickPyramid() {
@@ -381,16 +409,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		invTrMat.transpose(invTrMat);
 		renderer.setMVStackUniformVar(vMat, mStack, invTrMat);
 
-		renderer.drawWorldObject(brickPyramid.getVBOIndex(), brickPyramid.getNumVertices(), brickPyramid.getVBONIndex());
+		renderer.renderWorldObject(brickPyramid.getVBOIndex(), brickPyramid.getNumVertices(), brickPyramid.getVBONIndex());
 
 	}
 
-	private void renderAxisLines() {
-		if (displayAxisLines) {
-			renderer.renderAxisLines(vMat, mMat, pMat);
-		}
-	}
-	
 	// Deals with elapsed time and ensure that the values stay close
 	private void upateElapsedTimeInfo() {
 		currFrameTime = System.currentTimeMillis();
@@ -485,6 +507,56 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 	@Override
 	public void keyTyped(KeyEvent e) {}
 
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        int rotation = e.getWheelRotation();
+        float zoomFactor = 1.0f + (0.1f * rotation);
+		
+		if(zoomFactor < 1.0f) { renderer.addCurrentLightPositionY(zoomFactor); }  // moves light up
+		if(zoomFactor > 1.0f) { renderer.addCurrentLightPositionY(-zoomFactor); }  // moves light down
+		System.out.println(zoomFactor);
+
+        // Update camera position based on the mouse wheel rotation
+        // ...
+
+        myCanvas.display();
+    }
+
+	private int lastX, lastY, lastVarsSet = 0;
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		System.out.println("This is being called..");
+		if (lastVarsSet == 0) {
+			lastX = e.getX();
+			lastY = e.getY();
+			lastVarsSet = 1;
+		}
+        int x = e.getX();
+        int y = e.getY();
+
+        // Calculate the mouse movement
+        int dx = x - lastX;
+        int dy = y - lastY;
+
+		float xMovement = (float) dx / myCanvas.getWidth() * 0.1f;		
+    	float zMovement = (float) dy / myCanvas.getHeight() * 0.1f;
+
+        // Update object position based on the mouse movement
+        // ...
+		renderer.lightPositionAdd(dx, 0, dy);
+        // Remember the current mouse position
+        lastX = x;
+        lastY = y;
+
+        myCanvas.display();
+    }
+
+	@Override
+    public void mouseMoved(MouseEvent e) {
+        // Not used in this example
+    }
+
 
 
 	// **************** Key Listener Actions ****************************
@@ -512,4 +584,114 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 
 	// **************** Main ****************************
 	public static void main(String[] args) { new Code(); }
+
+
+	// private class MouseHandler implements MouseMotionListener {
+		
+	// 	private float x, y;
+
+	// 	private float lastX, lastY;
+	// 	@Override
+	// 	public void mouseMoved(MouseEvent e) {}
+    //     // @Override
+    //     // public void mouseMoved(MouseEvent e) {
+    //     //     // Handle mouse movement
+    //     //     int x = e.getX();
+    //     //     int y = e.getY();
+    //     //     System.out.println("Mouse moved to: (" + x + ", " + y + ")");
+    //     // }
+		
+	// 	@Override
+	// 	public void mousePressed(MouseEvent e) {
+	// 		lastX = e.getX();
+	// 		lastY = e.getY();
+	// 	}
+
+    //     @Override
+    //     public void mouseDragged(MouseEvent e) {
+    //         // Handle mouse dragging
+            
+	// 		float currentX = e.getX();
+	// 		float currentY = e.getY();
+	// 		float deltaX = currentX - lastX;
+	// 		float deltaY = currentY - lastY;
+			
+	// 		x = renderer.getCurrentLightX();
+	// 		y = renderer.getCurrentLightZ();
+	// 		// renderer.setCurrentLightPositionXY(deltaX, deltaY);
+	// 		// Update light position based on mouse drag
+	// 		x += deltaX * 0.01f;
+	// 		y -= deltaY * 0.01f;
+
+	// 		lastX = currentX;
+	// 		lastY = currentY;
+
+    //         System.out.println("Mouse dragged to: (" + x + ", " + y + ")");
+	// 		renderer.setCurrentLightPositionXZ(x, y);
+    //     }
+    // }
+	// private class MouseHandler extends MouseAdapter {
+    //     private int prevMouseX;
+	// 	private int prevMouseY;
+	// 	// private boolean isDragging;
+
+	// 	@Override
+	// 	public void mousePressed(MouseEvent e) {
+	// 		Point mousePos = myCanvas.getMousePosition();
+	// 		if(mousePos == null) return;
+	// 		// System.out.println(mousePos);
+	// 		prevMouseX = (int) mousePos.getX();
+	// 		prevMouseY = (int) mousePos.getY();
+	// 		// isDragging = true;
+	// 	}
+
+		// @Override
+		// public void mouseReleased(MouseEvent e) {
+		// 	isDragging = false;
+		// }
+
+        // @Override
+        // public void mousePressed(MouseEvent e) {
+        //     prevMousePos.set(e.getX(), e.getY());
+        // }
+
+		// @Override
+		// public void mouseDragged(MouseEvent e) {
+		// 	// System.out.println("isDragging: " + isDragging);
+		// 	// if (isDragging) {
+		// 		Point mousePos = myCanvas.getMousePosition();
+		// 		if(mousePos == null) return;
+		// 		// System.out.println(mousePos);
+		// 		int currMouseX = (int) mousePos.getX();
+		// 		int currMouseY = (int) mousePos.getY();
+	
+		// 		int deltaX = (currMouseX - prevMouseX);
+		// 		int deltaY = (currMouseY - prevMouseY);
+	
+		// 		float sensitivity = 0.01f;
+		// 		float dx = deltaX * sensitivity;
+		// 		float dy = deltaY * sensitivity;
+				
+		// 		// Update light position
+		// 		renderer.lightPositionAdd(dx, 0f, dy);
+		// 		// lightPos.x += dx;
+		// 		// lightPos.z += dy;
+	
+		// 		// Update previous mouse position
+		// 		prevMouseX = currMouseX;
+		// 		prevMouseY = currMouseY;
+	
+		// 		// Refresh the display
+		// 		// myCanvas.display();	
+		// 	// }
+   		// }
+
+		// @Override
+        // public void mouseDragged(MouseEvent e) {
+        //     float deltaX = (e.getX() - prevMousePos.x) / 10.0f;
+        //     float deltaZ = (e.getY() - prevMousePos.y) / -10.0f;
+		// 	renderer.lightPositionAdd(deltaX*3.5f, 0.0f, deltaZ*1.5f);
+		// 	prevMousePos.set(e.getX(), e.getY());
+		// }
+    // }
 }
