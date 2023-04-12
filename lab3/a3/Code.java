@@ -45,7 +45,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 	private Matrix4f vMat;  // view matrix
 	private Matrix4f mMat;  // model matrix
 	private Matrix4f invTrMat; // inverse-transpose
-	private Matrix4f mvMat; // model-view matrix
 	private Matrix4fStack mStack;
 
 
@@ -114,7 +113,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		pMat = new Matrix4f(); 
 		vMat = new Matrix4f();  
 		mMat = new Matrix4f();  
-		mvMat = new Matrix4f();
 		invTrMat = new Matrix4f(); 
 		mStack = new Matrix4fStack(7);
 	}
@@ -189,16 +187,18 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 	/** Renders on every frame and does actions */
 	public void display(GLAutoDrawable drawable) {
 		renderer.clearGL();
-
+		
 		upateElapsedTimeInfo();
 		setPerspective();
 		vMat.set(camera.getViewMatrix());
+
 		
 		renderer.useCubeMapShader();
 		renderSkybox();
-
+		
 		// * View Matrix from Camera
 		renderer.useMainShader();
+		renderer.setLightStatus();
 		renderer.setupLights(elapsedTimeOffset);
 		renderWorldObjects();		
 
@@ -213,7 +213,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 	}
 
 	private void renderWorldObjects() {
-		// ***** Using mvMatrix *****
 
 		// * Dolphin Object
 		updateDolphin();
@@ -349,7 +348,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 		mStack.translate(-(float)Math.sin(x)*10.0f,y*10f  ,(float)Math.cos(z)*2.0f);
 		// mStack.translate(x*5f,y,z);
 		mStack.rotate(icePyramid.getRotationAngle(), 0.0f, 1.0f, 0.0f);
-		
+
 		renderer.setGoldMaterial();
 		renderer.setupLights(elapsedTimeOffset);
 		mStack.invert(invTrMat);
@@ -453,6 +452,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 				System.out.println("Q key pressed");
 				upDownAction((float)elapsedTimeOffset);
 				break;
+			case KeyEvent.VK_L:
+				System.out.println("L pressed.");
+				toggleLightAction();
+				break;
 			case KeyEvent.VK_LEFT:
 				System.out.println("Arrow left key pressed");
 				panAction((float)elapsedTimeOffset);
@@ -505,6 +508,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener {
 	/** Pitch the camera up down (rotate about the U Vector) */ 
 	public void pitchAction(float newelapsedTimeOffset) { camera.pitch(newelapsedTimeOffset); }
 
+	public void toggleLightAction() { renderer.toggleLight(); }
 
 	// **************** Main ****************************
 	public static void main(String[] args) { new Code(); }

@@ -28,6 +28,10 @@ public class Renderer {
 
     private int hasTexture; // does not need initialization because it will be set in code
 
+    private int lightStatus;
+
+    private int isLightOn;
+
     // white light properties
 	float[] globalAmbient = new float[] { 0.6f, 0.6f, 0.6f, 1.0f };
 	float[] lightAmbient = new float[] { 0.1f, 0.1f, 0.1f, 1.0f };
@@ -64,6 +68,8 @@ public class Renderer {
 
         initialLightLoc = new Vector3f(0.0f, 10.0f, 0.0f);
         currentLightPos = new Vector3f();
+        // lightStatus = true;
+        isLightOn = 1;
 
         currVboIndex = 0;
         vals = Buffers.newDirectFloatBuffer(16);
@@ -166,6 +172,7 @@ public class Renderer {
 
         // include a texture flag in order to use the correct material light properties
         hasTexture = gl.glGetUniformLocation(shaders.get("mainShader"), "hasTexture");
+        lightStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "lightStatus");
     }
 
     public void useCubeMapShader() { 
@@ -311,12 +318,26 @@ public class Renderer {
     public int getCurrVBOIndex() { return currVboIndex; }
 
     public void setupLights(float elapsedSpeed) {
+        if (isLightOn == 0) { return; } 
         amt += elapsedSpeed * 0.5f;
         currentLightPos.set(initialLightLoc);
         currentLightPos.rotateAxis((float)Math.toRadians(amt), 0.0f, 0.0f, 1.0f);
         installLights();
-        
     }
+
+    public void setLightStatus() {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+        System.out.println("IsLightON: " + isLightOn);
+        gl.glUniform1i(lightStatus, isLightOn);
+    }
+    
+    public void lightOn() { isLightOn = 1; }
+    
+    public void lightOff() { isLightOn = 0; }
+
+    public void toggleLight() { isLightOn = isLightOn == 0 ? 1 : 0; }
+
+    public int lightStatus() { return lightStatus; }
 
     public boolean useTextureInShader() { return hasTexture != 0; }
 

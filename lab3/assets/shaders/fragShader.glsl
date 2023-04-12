@@ -34,7 +34,8 @@ uniform mat4 v_matrix;
 uniform mat4 p_matrix;
 uniform mat4 norm_matrix;
 
-uniform int hasTexture;
+uniform int hasTexture; // 0 for no, 1 for yes
+uniform int lightStatus; // 0 for off, 1 for on
 
 
 //vec4 tcolor;
@@ -44,40 +45,55 @@ vec3 diffuse;
 vec3 specular;
 
 
-void main(void)
-{	// normalize the light, normal, and view vectors:
-	vec3 L = normalize(varyingLightDir);
-	vec3 N = normalize(varyingNormal);
-	vec3 V = normalize(-v_matrix[3].xyz - varyingVertPos);
-	
-	// get the angle between the light and surface normal:
-	float cosTheta = dot(L,N);
-	
-	// halfway vector varyingHalfVector was computed in the vertex shader,
-	// and interpolated prior to reaching the fragment shader.
-	// It is copied into variable H here for convenience later.
-	vec3 H = normalize(varyingHalfVector);
-	
-	// get angle between the normal and the halfway vector
-	float cosPhi = dot(H,N);
+void lightsOnColoring(void) {
+	// normalize the light, normal, and view vectors:
+		vec3 L = normalize(varyingLightDir);
+		vec3 N = normalize(varyingNormal);
+		vec3 V = normalize(-v_matrix[3].xyz - varyingVertPos);
+		
+		// get the angle between the light and surface normal:
+		float cosTheta = dot(L,N);
+		
+		// halfway vector varyingHalfVector was computed in the vertex shader,
+		// and interpolated prior to reaching the fragment shader.
+		// It is copied into variable H here for convenience later.
+		vec3 H = normalize(varyingHalfVector);
+		
+		// get angle between the normal and the halfway vector
+		float cosPhi = dot(H,N);
+		// compute ADS contributions (per pixel):
 
-	// compute ADS contributions (per pixel):
+		if(hasTexture == 0) { 
 
-	if(hasTexture == 0) {
-		ambient = ((globalAmbient * material.ambient) + (light.ambient * material.ambient)).xyz;
-		diffuse = light.diffuse.xyz * material.diffuse.xyz * max(cosTheta,0.0);
-		specular = light.specular.xyz * material.specular.xyz * pow(max(cosPhi,0.0), material.shininess*3.0);
-		lcolor = vec4((ambient + diffuse + specular), 1.0);
-		fragColor = lcolor;
-	} else if (hasTexture == 1) {
-		ambient = ((globalAmbient) + (light.ambient)).xyz;
-		diffuse = light.diffuse.xyz * max(cosTheta,0.0);
-		specular = light.specular.xyz * pow(max(cosPhi,0.0), 1.0);
-		tcolor = texture(samp, tc);
-		lcolor = vec4(tcolor.xyz * (ambient + diffuse + specular), 1.0);
-		fragColor = lcolor;
-	}
+			ambient = ((globalAmbient * material.ambient) + (light.ambient * material.ambient)).xyz;
+			diffuse = light.diffuse.xyz * material.diffuse.xyz * max(cosTheta,0.0);
+			specular = light.specular.xyz * material.specular.xyz * pow(max(cosPhi,0.0), material.shininess*3.0);
+			lcolor = vec4((ambient + diffuse + specular), 1.0);
+			fragColor = lcolor;
 
-	
-	// fragColor = min((tcolor * (vec4((ambient + diffuse),1.0) + vec4(specular,0.0))), vec4(1,1,1,1));
+		 } 
+		else if (hasTexture == 1) { 
+
+			ambient = ((globalAmbient) + (light.ambient)).xyz;
+			diffuse = light.diffuse.xyz * max(cosTheta,0.0);
+			specular = light.specular.xyz * pow(max(cosPhi,0.0), 1.0);
+			tcolor = texture(samp, tc);
+			lcolor = vec4(tcolor.xyz * (ambient + diffuse + specular), 1.0);
+			fragColor = lcolor;
+
+		}
 }
+
+void lightsOffColoring(void){
+	if (hasTexture == 0) { fragColor = vec4(1.0, 0.0, 0.0, 1.0); } 
+		else if (hasTexture == 1) { fragColor = texture(samp, tc); }
+}
+
+void main(void) {	
+	
+	if (lightStatus == 0) { lightsOffColoring(); } 
+	else if (lightStatus == 1) { lightsOnColoring(); }
+}
+
+
+// fragColor = min((tcolor * (vec4((ambient + diffuse),1.0) + vec4(specular,0.0))), vec4(1,1,1,1));
