@@ -365,7 +365,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		boat.setLocation(x, y, z);
 
 		mStack.translation(x, y, z);
-		mStack.scale(0.2f, 0.2f, 0.2f);
+		mStack.scale(0.4f, 0.4f, 0.4f);
 
 		if(boat.getZDirection() < 0 ) mStack.rotate(-3.2f, 0f, 1f, 0f);
 
@@ -386,7 +386,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		waterTank.setLocation(x, y, z);
 		
 		mMat.translation(x, y, z);
-		mMat.scale(0.4f, 0.4f, 0.4f);
+		mMat.scale(0.6f, 0.6f, 0.5f);
 		mMat.rotate(1.5f, 0f,1f,0f);
 		
 		// if (boat.getZDirection() < 0) mMat.rotate(135, 0.0f, 1.0f, 0.0f);
@@ -437,18 +437,18 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 	private void updateIcePyramid() {
 		icePyramid.update(elapsedTimeOffset); // pyramid 1
-		// currObjLoc = icePyramid.getLocation();
+		currObjLoc = icePyramid.getLocation();
 
-		// // x = currObjLoc.x() + elapsedTimeOffset;
-		// x = currObjLoc.x;
-		// y = currObjLoc.y;
-		// // z = currObjLoc.z() + elapsedTimeOffset;
-		// z = currObjLoc.z;
+		// x = currObjLoc.x() + elapsedTimeOffset;
+		x = currObjLoc.x;
+		y = currObjLoc.y;
+		// z = currObjLoc.z() + elapsedTimeOffset;
+		z = currObjLoc.z;
 
-		// icePyramid.setLocation(x,y,z);
+		icePyramid.setLocation(x,y,z);
 		// currObjLoc = icePyramid.getLocation();
 		
-		mStack.translate(-(float)Math.sin(elapsedTimeOffset)*10.0f,0f ,(float)Math.cos(elapsedTimeOffset)*10.0f);
+		mStack.translate(0f, 4.3f, -7f);
 		// mStack.translate(x*5f,y,z);
 		mStack.rotate(icePyramid.getRotationAngle(), 0.0f, 1.0f, 0.0f);
 
