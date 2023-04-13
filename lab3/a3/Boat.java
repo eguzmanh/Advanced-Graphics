@@ -11,9 +11,8 @@ public class Boat extends ImportedWorldObject {
 
     public Boat(String shapeType, ImportedModel boat) {
         super(shapeType, boat);
-        // dolphin = new ImportedModel("assets/models/dolphinHighPoly.obj");
-        // setupVertices();
-        setLocation(1.5f, -0.1f, 2f);
+
+        setLocation(-2.0f, 0f, 3.0f);
 
 		zOff = 0.01f;
 		zDir = 1.0f;
@@ -22,8 +21,8 @@ public class Boat extends ImportedWorldObject {
 
 	/** adjusts the zOffset for the dophin */
 	public void validateZDirection() {
-		if (getLocation().z() >= 10f) zDir = -1;
-		if (getLocation().z() <= 0f) zDir = 1;
+		if (getLocation().z() >= 3.0f) zDir = -1;
+		if (getLocation().z() <=  -15.0f) zDir = 1;
 	}
 
 	// /** Get the z offset to move the dolphin */

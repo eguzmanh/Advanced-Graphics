@@ -7,41 +7,17 @@ import org.joml.*;
 
 // World object that is loaded from an OBJ file and also uses a special texture file
 public class WaterTank extends ImportedWorldObject {
-	private float zOff, zDir;
 
     public WaterTank(String shapeType, ImportedModel boat) {
         super(shapeType, boat);
-        // dolphin = new ImportedModel("assets/models/dolphinHighPoly.obj");
-        // setupVertices();
-        setLocation(-3f, 0f, 3f);
 
-		zOff = 0.01f;
-		zDir = 1.0f;
+        setLocation(10f, 0f, -17f);
     }
 
 
-	/** adjusts the zOffset for the dophin */
-	public void validateZDirection() {
-		if (getLocation().z() >= 10f) zDir = -1;
-		if (getLocation().z() <= 0f) zDir = 1;
-	}
-
-	// /** Get the z offset to move the dolphin */
-	// public float getZOffset() {
-	// 	return getSpeed() * zDir;
-	// }
-
-	/** Get the direction of the dolphin to ensure correct movement (range is [-1,1] ) */
-	public float getZDirection() {
-		return zDir;
-	}
 
 	@Override
     public void update(float elapsedTimeOffset) {
 		setSpeed(elapsedTimeOffset);
-		validateZDirection();
-		// adjustZOffset();
-
-		// setLocation(getLocation().x(), getLocation().y(), getLocation().z() + zOff);
 	}
 }

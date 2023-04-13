@@ -48,7 +48,7 @@ public class Pyramid extends ImportedWorldObject {
         // setVertices(vertices);
         // setTextureCoordinates(brickTextureCoordinates);
         // setNumVertices(18);
-        setLocation(0.2f, 0.3f, 0f);
+        setLocation(1f, 2f, 0f);
         // rotationAmnt = 0.0f;
 
         // setVBOIndex(renderer.getCurrVBOIndex() - 1);

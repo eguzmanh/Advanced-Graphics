@@ -73,7 +73,7 @@ void lightsOnColoring(void) {
 
 		 } 
 		else if (textureStatus == 1) { 
-
+			
 			ambient = ((globalAmbient) + (light.ambient)).xyz;
 			diffuse = light.diffuse.xyz * max(cosTheta,0.0);
 			specular = light.specular.xyz * pow(max(cosPhi,0.0), 1.0);

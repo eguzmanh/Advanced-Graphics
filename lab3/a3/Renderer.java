@@ -75,7 +75,7 @@ public class Renderer {
         vals16f = Buffers.newDirectFloatBuffer(16);
         vals3f = Buffers.newDirectFloatBuffer(3);
         shaders = new HashMap<String, Integer>();
-        setAmethystMaterial();
+        setNeutralWhiteMaterial();
     }
 
 
@@ -91,6 +91,13 @@ public class Renderer {
         matDif = Utils.goldDiffuse();
         matSpe = Utils.goldSpecular();
         matShi = Utils.goldShininess();
+    }
+    
+    public void setNeutralWhiteMaterial() {
+        matAmb = Utils.whiteAmbient();
+        matDif = Utils.whiteDiffuse();
+        matSpe = Utils.whiteSpecular();
+        matShi = Utils.whiteShininess();
     }
 
     // ****************************** Initialization ******************************
@@ -393,7 +400,7 @@ public class Renderer {
 
     public void toggleLight() { isLightOn = isLightOn == 0 ? 1 : 0; }
 
-    public int lightStatus() { return lightStatus; }
+    public int lightStatus() { return isLightOn; }
 
     public boolean useTextureInShader() { return hasTexture != 0; }
 
