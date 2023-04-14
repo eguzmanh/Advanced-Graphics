@@ -13,9 +13,6 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 import static com.jogamp.opengl.GL4.*;
 
-
-
-
 public class Renderer {
     private HashMap<String, Integer> shaders;
 
@@ -66,7 +63,7 @@ public class Renderer {
         vbo = new int[20];  
         lightPos = new float[3];
 
-        initialLightLoc = new Vector3f(0.0f, 10.0f, 0.0f);
+        initialLightLoc = new Vector3f(0.0f, 3.5f, 4f);
         currentLightPos = initialLightLoc;
         // lightStatus = true;
         isLightOn = 1;
@@ -275,7 +272,7 @@ public class Renderer {
 		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboTxId]);
 		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(1);
-
+        
 		gl.glActiveTexture(GL_TEXTURE0);
 		gl.glBindTexture(GL_TEXTURE_2D, texture);
 

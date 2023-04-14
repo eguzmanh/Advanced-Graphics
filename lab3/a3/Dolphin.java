@@ -13,7 +13,7 @@ public class Dolphin extends ImportedWorldObject {
         super(shapeType, dol);
         // dolphin = new ImportedModel("assets/models/dolphinHighPoly.obj");
         // setupVertices();
-        setLocation(10f, -0.5f, -15f);
+        setLocation(10f, -0.5f, -10f);
 
 		zOff = 0.01f;
 		zDir = 1.0f;

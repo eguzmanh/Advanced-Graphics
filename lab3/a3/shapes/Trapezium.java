@@ -17,12 +17,6 @@ public class Trapezium extends WorldObject {
         1f,0f,1f, -1f,0f,1f, 0f,1f,1f,
 
     };
-    // private float[] vertices = {
-    //     -1f,0f,0f, 0f,1f,0f, 1f,0f,0f,
-    //      1f,0f,0f, 1f,0f,1f, 1f,0f,-1f,
-    //     1f,0f,-1f, -1f,0f,0f, 1f,0f,0f,
-    //      1f,0f,0f,  1f,0f,1f, 1f,1f,1f
-    // };
 
 
     public Trapezium(String shapeType) {

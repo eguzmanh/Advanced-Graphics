@@ -64,7 +64,7 @@ public class Cube extends WorldObject {
         setVertices(vertices);
         setNumVertices(36);
         setNormals(normals);
-        setLocation(3f, 0f, 3.0f);
+        setLocation(9.5f, 0.8f, -11.0f);
         // rotationAngle = 0;
         yDir = 1.0f;
     }

@@ -59,18 +59,20 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 
 	private int brickTexture, iceTexture, artsyTexture, dolTexture, floralSheetTexture, 
-				drawerDoorTexture, marsDiffuseTexture, skyboxTexture, boatTexture, waterTankTexture;
+				drawerDoorTexture, marsDiffuseTexture, skyboxTexture, boatTexture, waterTankTexture, fishTexture;
 	
 	private Pyramid brickPyramid;
 	private Pyramid icePyramid;
-	private Cube artsyCube;
 	private Cube skyboxCube;
+	private Cube waterTankBox1;
+	private Cube waterTankBox2;
 	private Mars mars;
 	private Dolphin dol;
 	private Boat boat;
 	private WaterTank waterTank;
+	private Fish fish;
 
-	private ImportedModel marsObj, dolphinObj, pyramidObj, boatObj, waterTankObj;
+	private ImportedModel marsObj, dolphinObj, pyramidObj, boatObj, waterTankObj, fishObj;
 
 	private Vector3f currObjLoc;
 	private float x,y,z;
@@ -161,18 +163,22 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	}
 
 	private void loadObjects() {
-		marsObj = new ImportedModel("assets/models/mars.obj");
+		// marsObj = new ImportedModel("assets/models/mars.obj");
 		dolphinObj = new ImportedModel("assets/models/dolphinHighPoly.obj");
-		pyramidObj = new ImportedModel("assets/models/pyr.obj");
+		// pyramidObj = new ImportedModel("assets/models/pyr.obj");
 		boatObj = new ImportedModel("assets/models/MarlowBoat.obj");
 		waterTankObj = new ImportedModel("assets/models/waterTank.obj");
+		fishObj = new ImportedModel("assets/models/fish.obj");
 	}
 
 	// refer to readme for source explanations
 	private void loadTextures() {
 		dolTexture =  Utils.loadTexture("assets/textures/Dolphin_HighPolyUV.png");
-		artsyTexture = Utils.loadTexture("assets/textures/pexels-anni-roenkae.jpg");
-		marsDiffuseTexture = Utils.loadTexture("assets/textures/mars/Diffuse_2K.png");
+		fishTexture = Utils.loadTexture("assets/textures/fish_texture.png");
+
+
+		// artsyTexture = Utils.loadTexture("assets/textures/pexels-anni-roenkae.jpg");
+		// marsDiffuseTexture = Utils.loadTexture("assets/textures/mars/Diffuse_2K.png");
 		brickTexture = Utils.loadTexture("assets/textures/brick1.jpg");
 
 		skyboxTexture = Utils.loadCubeMap("assets/cubeMaps/LakeIslands");
@@ -182,33 +188,38 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		waterTankTexture = Utils.loadTexture("assets/textures/water-tank/colour.png");
 
 		// ! Unused
-		iceTexture = Utils.loadTexture("assets/textures/ice.jpg");
+		// iceTexture = Utils.loadTexture("assets/textures/ice.jpg");
 		// floralSheetTexture = Utils.loadTexture("assets/textures/floral_sheet.png");
 		// drawerDoorTexture = Utils.loadTexture("assets/textures/Drawer_Door.jpg");
 	}
 
 	private void buildWorldObjects() {	
 		skyboxCube = new Cube("cube");
-		brickPyramid = new Pyramid("pyramid", pyramidObj);
-		icePyramid = new Pyramid("pyramid", pyramidObj);
-		// artsyCube = new Cube("cube");
-		mars = new Mars("sphere", marsObj);
+		// brickPyramid = new Pyramid("pyramid", pyramidObj);
+		// icePyramid = new Pyramid("pyramid", pyramidObj);
+		waterTankBox1 = new Cube("cube");
+		waterTankBox2 = new Cube("cube");
+		// mars = new Mars("sphere", marsObj);
 		dol = new Dolphin("dolphin", dolphinObj);
 
 		boat = new Boat("boat", boatObj);
 		waterTank = new WaterTank("waterTank", waterTankObj);
+
+		fish = new Fish("fish", fishObj);
 	}
 
 	private void bindWorldObjects() {
 		renderer.bindWorldObject(skyboxCube, skyboxCube.getVertices());
 		renderer.bindTexturedWorldObject(dol, dol.getVertices(), dol.getTextureCoordinates(), dol.getNormals());
 		renderer.bindTexturedWorldObject(boat, boat.getVertices(), boat.getTextureCoordinates(), boat.getNormals());
+		renderer.bindTexturedWorldObject(fish, fish.getVertices(), fish.getTextureCoordinates(), fish.getNormals());
 
 		renderer.bindTexturedWorldObject(waterTank, waterTank.getVertices(), waterTank.getTextureCoordinates(), waterTank.getNormals());
-		// renderer.bindTexturedWorldObject(artsyCube, artsyCube.getVertices(), artsyCube.getArtsyTextureCoordinates(), artsyCube.getNormals());
-		renderer.bindTexturedWorldObject(mars, mars.getVertices(), mars.getTextureCoordinates(), mars.getNormals());
-		renderer.bindTexturedWorldObject(brickPyramid, brickPyramid.getVertices(), brickPyramid.getTextureCoordinates(), brickPyramid.getNormals());
-		renderer.bindTexturedWorldObject(icePyramid, icePyramid.getVertices(), icePyramid.getTextureCoordinates(), icePyramid.getNormals());
+		renderer.bindWorldObjectWNormals(waterTankBox1, waterTankBox1.getVertices(), waterTankBox1.getNormals());
+		renderer.bindWorldObjectWNormals(waterTankBox2, waterTankBox2.getVertices(), waterTankBox2.getNormals());
+		// renderer.bindTexturedWorldObject(mars, mars.getVertices(), mars.getTextureCoordinates(), mars.getNormals());
+		// renderer.bindTexturedWorldObject(brickPyramid, brickPyramid.getVertices(), brickPyramid.getTextureCoordinates(), brickPyramid.getNormals());
+		// renderer.bindTexturedWorldObject(icePyramid, icePyramid.getVertices(), icePyramid.getTextureCoordinates(), icePyramid.getNormals());
 	}
 
 
@@ -259,9 +270,12 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		// * Dolphin Object
 		mMat.identity();
 		updateDolphin();
-
 		mMat.identity();
 		updateWaterTank();
+		mMat.identity();
+		updateWaterTankBox1();
+		mMat.identity();
+		updateWaterTankBox2();
 
 		// mMat.identity();
 		// updateBoat();
@@ -314,7 +328,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 		// * Ice Pyramid Object   -- child of mars
 		mStack.pushMatrix();
-		updateIcePyramid();
+		// updateIcePyramid();
+		updateFish();
 		mStack.popMatrix();
 
 		// * brick Pyramid Object -- child of mars
@@ -397,47 +412,52 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		renderer.renderWorldObject(waterTank.getVBOIndex(), waterTank.getNumVertices(), waterTank.getVBOTxIndex(), waterTankTexture, waterTank.getVBONIndex());
 	}
 
-	private void updateArtsyCube() {
-		artsyCube.update(elapsedTimeOffset, 0.0f, 5.0f); // pyramid 2
+	private void updateWaterTankBox1() {
+		waterTankBox1.update(elapsedTimeOffset, 0.0f, 5.0f); // pyramid 2
 
-		currObjLoc = artsyCube.getLocation();
+		currObjLoc = waterTankBox1.getLocation();
 		x = currObjLoc.x();
-		// y = currObjLoc.y() + elapsedTimeOffset * artsyCube.getYDir();
 		y = currObjLoc.y();
 		z = currObjLoc.z();
-		artsyCube.setLocation(x,y,z);
 
-		mMat.translation(x, y, z);	
-		mMat.rotate(artsyCube.getRotationAngle(), 0.0f, 1.0f, 0.0f);
+		waterTankBox1.setLocation(x,y,z);
 
+		mMat.translation(x+1.5f, y, z);	
+		// mMat.rotate(waterTankBox1.getRotationAngle(), 0.0f, 1.0f, 0.0f);
+		mMat.scale(0.5f, 0.5f, 0.5f);
+		
+		renderer.setGoldMaterial();
+		renderer.setupLights(elapsedTimeOffset);
 		updateMMatrix();
 
-		renderer.renderWorldObject(artsyCube.getVBOIndex(), artsyCube.getNumVertices(), artsyCube.getVBOTxIndex(), artsyTexture, artsyCube.getVBONIndex());
+		renderer.renderWorldObject(waterTankBox1.getVBOIndex(), waterTankBox1.getNumVertices(), waterTankBox1.getVBONIndex());
 	}
 
-	private void updateMars() {
-		mars.update(elapsedTimeOffset);
-		currObjLoc = mars.getLocation();
+	private void updateWaterTankBox2() {
+		waterTankBox2.update(elapsedTimeOffset, 0.0f, 5.0f); // pyramid 2
 
-		x = currObjLoc.x() + elapsedTimeOffset * mars.getXDirection();
-		// x = currObjLoc.x();
+		currObjLoc = waterTankBox2.getLocation();
+		x = currObjLoc.x();
 		y = currObjLoc.y();
 		z = currObjLoc.z();
 
-		mars.setLocation(x, y, z);
+		waterTankBox2.setLocation(x,y,z);
 
-		mStack.translate(x,y,z);	
-		mStack.scale(0.5f, 0.5f, 0.5f);	
+		mMat.translation(x-1.5f, y, z);	
+		// mMat.rotate(waterTankBox2.getRotationAngle(), 0.0f, 1.0f, 0.0f);
+		mMat.scale(0.5f, 0.5f, 0.5f);
 		
+		renderer.setAmethystMaterial();
 		renderer.setupLights(elapsedTimeOffset);
-		updateMStackMatrix();
+		updateMMatrix();
 
-		renderer.renderWorldObject(mars.getVBOIndex(), mars.getNumVertices(), mars.getVBOTxIndex(), marsDiffuseTexture, mars.getVBONIndex());
+		renderer.renderWorldObject(waterTankBox2.getVBOIndex(), waterTankBox2.getNumVertices(), waterTankBox2.getVBONIndex());
 	}
 
-	private void updateIcePyramid() {
-		icePyramid.update(elapsedTimeOffset); // pyramid 1
-		currObjLoc = icePyramid.getLocation();
+
+	private void updateFish() {
+		fish.update(elapsedTimeOffset); // pyramid 1
+		currObjLoc = fish.getLocation();
 
 		// x = currObjLoc.x() + elapsedTimeOffset;
 		x = currObjLoc.x;
@@ -445,48 +465,22 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		// z = currObjLoc.z() + elapsedTimeOffset;
 		z = currObjLoc.z;
 
-		icePyramid.setLocation(x,y,z);
-		// currObjLoc = icePyramid.getLocation();
+		fish.setLocation(x,y,z);
+		// currObjLoc = fish.getLocation();
 		
-		mStack.translate(0f, 4.3f, -7f);
+		mStack.translate(1f,4f, -7f);
 		// mStack.translate(x*5f,y,z);
-		mStack.rotate(icePyramid.getRotationAngle(), 0.0f, 1.0f, 0.0f);
+		mStack.rotate(0.7f, 0.0f, 0.0f, 1.0f);
 
-		renderer.setGoldMaterial();
-		renderer.setupLights(elapsedTimeOffset);
-
-		mStack.invert(invTrMat);
-		invTrMat.transpose(invTrMat);
-		renderer.setMVStackUniformVar(vMat, mStack, invTrMat);
-
-		renderer.renderWorldObject(icePyramid.getVBOIndex(), icePyramid.getNumVertices(), icePyramid.getVBONIndex());
-	}
-
-	private void updateBrickPyramid() {
-		brickPyramid.update(elapsedTimeOffset); // pyramid 2
-		currObjLoc = boat.getLocation();
-
-		x = currObjLoc.x();
-		y = currObjLoc.y();
-		z = currObjLoc.z();
-		
-		brickPyramid.setLocation(x,y,z);
-		currObjLoc = brickPyramid.getLocation();
-
-		mStack.translate((float)Math.sin(x)*2.0f,y ,(float)Math.cos(z)*2.0f);
-		mStack.rotate(brickPyramid.getRotationAngle(), 0.0f, -1.0f, 0.0f);
-
-		renderer.setAmethystMaterial();
-		renderer.setupLights(elapsedTimeOffset);
+		// renderer.setAmethystMaterial();
+		// renderer.setupLights(elapsedTimeOffset);
 
 		mStack.invert(invTrMat);
 		invTrMat.transpose(invTrMat);
 		renderer.setMVStackUniformVar(vMat, mStack, invTrMat);
 
-		renderer.renderWorldObject(brickPyramid.getVBOIndex(), brickPyramid.getNumVertices(), brickPyramid.getVBONIndex());
-
+		renderer.renderWorldObject(fish.getVBOIndex(), fish.getNumVertices(), fish.getVBOTxIndex(), fishTexture, fish.getVBONIndex());
 	}
-
 	// Deals with elapsed time and ensure that the values stay close
 	private void upateElapsedTimeInfo() {
 		currFrameTime = System.currentTimeMillis();
@@ -503,7 +497,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 		lastFrameTime = currFrameTime;
 	}
-
+ 
 
 	// ************************* Overrides *************************
 	@Override
@@ -588,15 +582,13 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		if(zoomFactor < 1.0f) { renderer.addCurrentLightPositionY(zoomFactor); }  // moves light up
 		if(zoomFactor > 1.0f) { renderer.addCurrentLightPositionY(-zoomFactor); }  // moves light down
-		System.out.println(zoomFactor);
     }
-
 
 	private int lastX, lastY, lastVarsSet = 0;
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		System.out.println("This is being called..");
+		System.out.println("Mouse being dragged..");
 		if (lastVarsSet == 0) {
 			lastX = e.getX();
 			lastY = e.getY();

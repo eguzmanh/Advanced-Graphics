@@ -11,7 +11,7 @@ public class WaterTank extends ImportedWorldObject {
     public WaterTank(String shapeType, ImportedModel boat) {
         super(shapeType, boat);
 
-        setLocation(10f, 0f, -17f);
+        setLocation(10f, 0f, -12f);
     }
 
 
