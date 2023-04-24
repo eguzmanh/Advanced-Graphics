@@ -33,10 +33,10 @@ public class Renderer {
 	// private Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
 
     // white light properties
-	float[] globalAmbient = new float[] { 0.6f, 0.6f, 0.6f, 1.0f };
-	float[] lightAmbient = new float[] { 0.1f, 0.1f, 0.1f, 1.0f };
-	float[] lightDiffuse = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
-	float[] lightSpecular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+	private float[] globalAmbient = new float[] { 0.7f, 0.7f, 0.7f, 1.0f };
+	private float[] lightAmbient = new float[] { 0.0f, 0.0f, 0.0f, 1.0f };
+	private float[] lightDiffuse = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+	private float[] lightSpecular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
 		
 	// gold material
 	float[] matAmb;
@@ -319,8 +319,12 @@ public class Renderer {
 		gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(1);
         
+        
+		gl.glEnable(GL_CULL_FACE);
+		gl.glFrontFace(GL_CCW);
 		gl.glEnable(GL_DEPTH_TEST);
 		gl.glDepthFunc(GL_LEQUAL);
+
 
 		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
 	}
@@ -339,8 +343,70 @@ public class Renderer {
 		gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(2);
 
+
+		gl.glEnable(GL_CULL_FACE);
+		gl.glFrontFace(GL_CCW);
+		gl.glEnable(GL_DEPTH_TEST);
+		gl.glDepthFunc(GL_LEQUAL);
+
 		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
 	}
+
+     /** Bind objects with a texture */
+	public void renderWorldObjectFirst(int vboObjId,int numVertices, int vboTxId, int texture, int vboNId) {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        gl.glUniform1i(glTextureStatus, 1);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
+		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(0);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboTxId]);
+		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+        
+		gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_2D, texture);
+
+        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboNId]);
+		gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+        
+        
+		gl.glClear(GL_DEPTH_BUFFER_BIT);
+		gl.glEnable(GL_CULL_FACE);
+		gl.glFrontFace(GL_CCW);
+		gl.glEnable(GL_DEPTH_TEST);
+		gl.glDepthFunc(GL_LEQUAL);
+
+
+		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
+	}
+
+    /** Bind objects without a texture */
+	public void renderWorldObjectFirst(int vboObjId, int numVertices, int vboNId) {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        gl.glUniform1i(glTextureStatus, 0);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
+		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(0);
+
+        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboNId]);
+		gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(2);
+
+        gl.glClear(GL_DEPTH_BUFFER_BIT);
+		gl.glEnable(GL_CULL_FACE);
+		gl.glFrontFace(GL_CCW);
+		gl.glEnable(GL_DEPTH_TEST);
+		gl.glDepthFunc(GL_LEQUAL);
+
+		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
+	}
+
 
     public void setMainShaderUniVars(Matrix4f mMat, Matrix4f vMat, Matrix4f pMat, Matrix4f nMat, Matrix4f sMat) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
@@ -406,7 +472,6 @@ public class Renderer {
     // // private dir created for a direction change
     // private int dir = 1;
     public void setupLights(float elapsedSpeed) {
-        if (isLightOn == 0) { return; } 
         // amt = elapsedSpeed;
         // System.out.prin
 

@@ -190,6 +190,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		pMat.setPerspective((float) Math.toRadians(60.0f), aspect, 0.1f, 1000.0f);
 		
 		lightVmat.identity().setLookAt(renderer.getCurrentLight(), origin, up);	// vector from light to origin
+		// ightVmat.identity().setLookAt(renderer.getCurrentLight(), camera.getLocation(), camera.getV());	// vector from light to origin
 		lightPmat.identity().setPerspective((float) Math.toRadians(60.0f), aspect, 0.1f, 1000.0f);
 	}
 
@@ -332,7 +333,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		mMat.identity();
 		updateChessBoard();
 		pass1CommonActions();
-		renderer.renderWorldObject(chessBoard.getVBOIndex(), chessBoard.getNumVertices(), chessBoard.getVBOTxIndex(), chessBoardTexture, chessBoard.getVBONIndex());
+		renderer.renderWorldObjectFirst(chessBoard.getVBOIndex(), chessBoard.getNumVertices(), chessBoard.getVBONIndex());
 
 		mMat.identity();
 		updateChessKingWhite();
@@ -380,7 +381,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		mMat.identity();
 		updateChessBoard();
 		pass2CommonActions();
-		renderer.renderWorldObject(chessBoard.getVBOIndex(), chessBoard.getNumVertices(), chessBoard.getVBOTxIndex(), chessBoardTexture, chessBoard.getVBONIndex());
+		renderer.renderWorldObjectFirst(chessBoard.getVBOIndex(), chessBoard.getNumVertices(), chessBoard.getVBOTxIndex(), chessBoardTexture, chessBoard.getVBONIndex());
 
 		renderer.setGoldMaterial();
 		renderer.setupLights(elapsedTimeOffset);	
@@ -489,7 +490,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		chessKingBlack.setLocation(x, y, z);
 		
-		mMat.translation(x, y, z);
+		mMat.translation(x+2f, y, z+2.5f);
 		// mMat.scale(0.75f, 0.75f, 0.75f);
 		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 
@@ -572,7 +573,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		chessRookWhite2.setLocation(x, y, z);
 		
-		mMat.translation(x+5f, y, z-14f);
+		mMat.translation(x+5f, y, z);
 		// mMat.scale(0.75f, 0.75f, 0.75f);
 		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 
@@ -621,9 +622,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	@Override
 	public void dispose(GLAutoDrawable drawable) {}
 
-	@Override
-	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {}
-	
 	@Override
 	public void keyPressed(KeyEvent e) {	
 		int evtKeyCode = e.getKeyCode();
@@ -752,4 +750,13 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 	// **************** Main ****************************
 	public static void main(String[] args) { new Code(); }
+	
+	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
+	{	GL4 gl = (GL4) GLContext.getCurrentGL();
+
+		aspect = (float) myCanvas.getWidth() / (float) myCanvas.getHeight();
+		pMat.identity().setPerspective((float) Math.toRadians(60.0f), aspect, 0.1f, 1000.0f);
+
+		setupShadowBuffers();
+	}
 }

@@ -12,7 +12,7 @@ public class Camera {
     private Matrix4f viewMatrix, viewRotationMatrix, viewTranslationMatrix;
     
     public Camera() {	
-		location = new Vector3f(0.0f, 7f, 22f);
+		location = new Vector3f(0.0f, 7f, 25f);
 		u = new Vector3f(1.0f, 0.0f, 0.0f);
 		v = new Vector3f(0.0f, 1.0f, 0.0f);
 		n = new Vector3f(0.0f, 0.0f, -1.0f);

@@ -70,21 +70,21 @@ void main(void) {
 	if(textureStatus == 0) { 
 		ambient = ((globalAmbient * material.ambient) + (light.ambient * material.ambient)).xyz;
 		lcolor = vec4(ambient, 1.0);
-		//if(notInShadow == 1.0) {
+		if(lightStatus == 1.0 && notInShadow == 1.0) {
 				diffuse = light.diffuse.xyz * material.diffuse.xyz * max(cosTheta,0.0);
 				specular = light.specular.xyz * material.specular.xyz * pow(max(cosPhi,0.0), material.shininess*3.0);
-				lcolor = vec4((lcolor.xyz + diffuse + specular), 1.0);
-		//}
+				lcolor += vec4((diffuse + specular), 1.0);
+		}
 		fragColor = lcolor;
 	} 
 	else if (textureStatus == 1) { 
 		ambient = ((globalAmbient) + (light.ambient)).xyz;
 		lcolor = vec4(ambient, 1.0);
-		//if(notInShadow == 1.0) {
+		if(lightStatus == 1.0 && notInShadow == 1.0) {
 				diffuse = light.diffuse.xyz * max(cosTheta,0.0);
-				specular = light.specular.xyz * pow(max(cosPhi,0.0), 1.0);
-				lcolor = vec4((lcolor.xyz + diffuse + specular), 1.0);
-			//}
+				specular = light.specular.xyz * pow(max(cosPhi,0.0), 32.0);
+				lcolor += vec4((diffuse + specular), 1.0);
+		}
 		
 
 		tcolor = texture(samp, tc);
