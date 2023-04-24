@@ -70,13 +70,22 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	private Vector3f up;
 
 	
-	private ImportedModel dolphinObj, waterTankObj;
+	// private ImportedModel dolphinObj, waterTankObj;
+	private ImportedModel chessBoardObj, chessKingObj, chessQueenObj, chessBishopObj, chessKnightObj, chessRookObj, chessPawnObj;
+
 	private Cube skyboxCube;
-	private Dolphin dol;
-	private WaterTank waterTank;
-	private Cube waterTankBox1;
+	// private Dolphin dol;
+	// private WaterTank waterTank;
+	// private Cube waterTankBox1;
+	private ChessBoard chessBoard;
+
+	// ChessPieces for each side
+	// private ChessPiece chessKing1, chessQueen1, chessBishop1, chessKnight1, chessRook1, chessPawn1;
+	private ChessPiece chessKingWhite, chessKingBlack, chessRookWhite1, chessRookWhite2;
+	// private ChessPiece chessKing2, chessQueen2, chessBishop2, chessKnight2, chessRook2, chessPawn2;
 	
-	private int dolTexture, skyboxTexture, waterTankTexture;
+	// private int dolTexture, skyboxTexture, waterTankTexture;
+	private int skyboxTexture, chessBoardTexture;
 
 	
 	private Vector3f currObjLoc;
@@ -185,29 +194,80 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	}
 
 	private void loadObjects() {
-		dolphinObj = new ImportedModel("assets/models/dolphinHighPoly.obj");
-		waterTankObj = new ImportedModel("assets/models/waterTank.obj");
+		// dolphinObj = new ImportedModel("assets/models/dolphinHighPoly.obj");
+		// waterTankObj = new ImportedModel("assets/models/waterTank.obj");
+		chessBoardObj = new ImportedModel("assets/models/chess/Board_HalfSize2.obj");
+		
+		// Chess Pieces
+		chessKingObj = new ImportedModel("assets/models/chess/King.obj");
+		chessRookObj = new ImportedModel("assets/models/chess/Rook.obj");
+		
+		// chessQueenObj = new ImportedModel("assets/models/chess/Queen2.obj");
+		// chessBishopObj = new ImportedModel("assets/models/chess/Bishop2.obj");
+		// chessKnightObj = new ImportedModel("assets/models/chess/Knight2.obj");
+		// chessPawnObj = new ImportedModel("assets/models/chess/Pawn.obj");
+
+
+		// two Kings, two rooks
+		// checkmate scene
 	}
 
 	// refer to readme for source explanations
 	private void loadTextures() {
-		dolTexture =  Utils.loadTexture("assets/textures/Dolphin_HighPolyUV.png");
+		// dolTexture =  Utils.loadTexture("assets/textures/Dolphin_HighPolyUV.png");
 		skyboxTexture = Utils.loadCubeMap("assets/cubeMaps/space/red");
-		waterTankTexture = Utils.loadTexture("assets/textures/water-tank/colour.png");
+		// waterTankTexture = Utils.loadTexture("assets/textures/water-tank/colour.png");
+		chessBoardTexture = Utils.loadTexture("assets/textures/chess/WoodenChessBoard_diffuse.jpg");
 	}
 
 	private void buildWorldObjects() {	
 		skyboxCube = new Cube("cube");
-		waterTankBox1 = new Cube("cube");
-		dol = new Dolphin("dolphin", dolphinObj);
-		waterTank = new WaterTank("waterTank", waterTankObj);
+		// waterTankBox1 = new Cube("cube");
+		// dol = new Dolphin("dolphin", dolphinObj);
+		// waterTank = new WaterTank("waterTank", waterTankObj);
+
+		chessBoard = new ChessBoard("chessBoard", chessBoardObj);
+
+		chessKingWhite = new ChessPiece("chessPiece", chessKingObj);
+		chessKingBlack = new ChessPiece("chessPiece", chessKingObj);
+
+		chessRookWhite1 = new ChessPiece("chessPiece", chessRookObj);
+		chessRookWhite2 = new ChessPiece("chessPiece", chessRookObj);
+		// chessKing1.setLocation(0.0f, 0.0f, 0.0f);
+
+		// chessQueen1 = new ChessPiece("chessPiece", chessQueenObj);
+		// // chessQueen1.setLocation(0.0f, 0.0f, 0.0f);
+
+		// chessBishop1 = new ChessPiece("chessPiece", chessBishopObj);
+		// // chessBishop1.setLocation(0.0f, 0.0f, 0.0f);
+
+		// chessKnight1 = new ChessPiece("chessPiece", chessKnightObj);
+		// // chessKnight1.setLocation(0.0f, 0.0f, 0.0f);
+
+		// chessRook1 = new ChessPiece("chessPiece", chessRookObj);
+		// // chessRook1.setLocation(0.0f, 0.0f, 0.0f);
+
+		// chessPawn1 = new ChessPiece("chessPiece", chessPawnObj);
+		// chessPawn1.setLocation(0.0f, 0.0f, 0.0f);
+		
 	}
 
 	private void bindWorldObjects() {
 		renderer.bindWorldObject(skyboxCube, skyboxCube.getVertices());
-		renderer.bindTexturedWorldObject(dol, dol.getVertices(), dol.getTextureCoordinates(), dol.getNormals());
-		renderer.bindTexturedWorldObject(waterTank, waterTank.getVertices(), waterTank.getTextureCoordinates(), waterTank.getNormals());
-		renderer.bindWorldObjectWNormals(waterTankBox1, waterTankBox1.getVertices(), waterTankBox1.getNormals());
+		// renderer.bindTexturedWorldObject(dol, dol.getVertices(), dol.getTextureCoordinates(), dol.getNormals());
+		// renderer.bindTexturedWorldObject(waterTank, waterTank.getVertices(), waterTank.getTextureCoordinates(), waterTank.getNormals());
+		// renderer.bindWorldObjectWNormals(waterTankBox1, waterTankBox1.getVertices(), waterTankBox1.getNormals());
+		
+		renderer.bindTexturedWorldObject(chessBoard, chessBoard.getVertices(), chessBoard.getTextureCoordinates(), chessBoard.getNormals());
+		renderer.bindWorldObjectWNormals(chessKingWhite, chessKingWhite.getVertices(), chessKingWhite.getNormals());
+		renderer.bindWorldObjectWNormals(chessKingBlack, chessKingBlack.getVertices(), chessKingBlack.getNormals());
+		renderer.bindWorldObjectWNormals(chessRookWhite1, chessRookWhite1.getVertices(), chessRookWhite1.getNormals());
+		renderer.bindWorldObjectWNormals(chessRookWhite2, chessRookWhite2.getVertices(), chessRookWhite2.getNormals());
+
+		// renderer.bindWorldObjectWNormals(chessQueen1, chessQueen1.getVertices(), chessQueen1.getNormals());
+		// renderer.bindWorldObjectWNormals(chessBishop1, chessBishop1.getVertices(), chessBishop1.getNormals());
+		// renderer.bindWorldObjectWNormals(chessKnight1, chessKnight1.getVertices(), chessKnight1.getNormals());
+		// renderer.bindWorldObjectWNormals(chessPawn1, chessPawn1.getVertices(), chessPawn1.getNormals());
 	}
 
 
@@ -268,52 +328,105 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	// TODO: create an update for eadch object separately so that updates to an object's position only occurs once per round
 
 
+	private void renderWorldObjectsP1() {
+		mMat.identity();
+		updateChessBoard();
+		pass1CommonActions();
+		renderer.renderWorldObject(chessBoard.getVBOIndex(), chessBoard.getNumVertices(), chessBoard.getVBOTxIndex(), chessBoardTexture, chessBoard.getVBONIndex());
+
+		mMat.identity();
+		updateChessKingWhite();
+		pass1CommonActions();
+		renderer.renderWorldObject(chessKingWhite.getVBOIndex(), chessKingWhite.getNumVertices(), chessKingWhite.getVBONIndex());
+
+		mMat.identity();
+		updateChessKingBlack();
+		pass1CommonActions();
+		renderer.renderWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBONIndex());
+
+		// mMat.identity();
+		// updateChessQueen();
+		// pass1CommonActions();
+		// renderer.renderWorldObject(chessQueen1.getVBOIndex(), chessQueen1.getNumVertices(), chessQueen1.getVBONIndex());
+
+		// mMat.identity();
+		// updateChessBishop();
+		// pass1CommonActions();
+		// renderer.renderWorldObject(chessBishop1.getVBOIndex(), chessBishop1.getNumVertices(), chessBishop1.getVBONIndex());
+
+		// mMat.identity();
+		// updateChessKnight();
+		// pass1CommonActions();
+		// renderer.renderWorldObject(chessKnight1.getVBOIndex(), chessKnight1.getNumVertices(), chessKnight1.getVBONIndex());
+
+		mMat.identity();
+		updateChessRookWhite1();
+		pass1CommonActions();
+		renderer.renderWorldObject(chessRookWhite1.getVBOIndex(), chessRookWhite1.getNumVertices(), chessRookWhite1.getVBONIndex());
+
+		mMat.identity();
+		updateChessRookWhite2();
+		pass1CommonActions();
+		renderer.renderWorldObject(chessRookWhite2.getVBOIndex(), chessRookWhite2.getNumVertices(), chessRookWhite2.getVBONIndex());
+
+		// mMat.identity();
+		// updateChessPawn();
+		// pass1CommonActions();
+		// renderer.renderWorldObject(chessPawn1.getVBOIndex(), chessPawn1.getNumVertices(), chessPawn1.getVBONIndex());
+	}
+
 	private void renderWorldObjectsP2() {
 
-		// * Dolphin Object
-		renderer.setupLights(elapsedTimeOffset);
 		mMat.identity();
-		updateDolphin();
-
-		mMat.invert(invTrMat);
-		invTrMat.transpose(invTrMat);
-
-		shadowMVP2.identity();
-		shadowMVP2.mul(b);
-		shadowMVP2.mul(lightPmat);
-		shadowMVP2.mul(lightVmat);
-		shadowMVP2.mul(mMat);
-
-		renderer.setMainShaderUniVars(mMat, vMat, pMat, invTrMat, shadowMVP2);
-		renderer.renderWorldObject(dol.getVBOIndex(), dol.getNumVertices(), dol.getVBOTxIndex(), dolTexture, dol.getVBONIndex());
-
-
-
-		renderer.setupLights(elapsedTimeOffset);
-		mMat.identity();
-		updateWaterTank();
-
-		mMat.invert(invTrMat);
-		invTrMat.transpose(invTrMat);
-
-		shadowMVP2.identity();
-		shadowMVP2.mul(b);
-		shadowMVP2.mul(lightPmat);
-		shadowMVP2.mul(lightVmat);
-		shadowMVP2.mul(mMat);
-
-		renderer.setMainShaderUniVars(mMat, vMat, pMat, invTrMat, shadowMVP2);
-		renderer.renderWorldObject(waterTank.getVBOIndex(), waterTank.getNumVertices(), waterTank.getVBOTxIndex(), waterTankTexture, waterTank.getVBONIndex());
-	
-
+		updateChessBoard();
+		pass2CommonActions();
+		renderer.renderWorldObject(chessBoard.getVBOIndex(), chessBoard.getNumVertices(), chessBoard.getVBOTxIndex(), chessBoardTexture, chessBoard.getVBONIndex());
 
 		renderer.setGoldMaterial();
-		renderer.setupLights(elapsedTimeOffset);
-		
+		renderer.setupLights(elapsedTimeOffset);	
 		mMat.identity();
-		updateWaterTankBox1();
+		updateChessKingWhite();
+		pass2CommonActions();
+		renderer.renderWorldObject(chessKingWhite.getVBOIndex(), chessKingWhite.getNumVertices(), chessKingWhite.getVBONIndex());
 
-		renderer.setupLights(elapsedTimeOffset);
+		renderer.setAmethystMaterial();
+		renderer.setupLights(elapsedTimeOffset);	
+		mMat.identity();
+		updateChessKingBlack();
+		pass2CommonActions();
+		renderer.renderWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBONIndex());
+
+		renderer.setGoldMaterial();
+		renderer.setupLights(elapsedTimeOffset);	
+		mMat.identity();
+		updateChessRookWhite1();
+		pass2CommonActions();
+		renderer.renderWorldObject(chessRookWhite1.getVBOIndex(), chessRookWhite1.getNumVertices(), chessRookWhite1.getVBONIndex());
+
+		renderer.setGoldMaterial();
+		renderer.setupLights(elapsedTimeOffset);	
+		mMat.identity();
+		updateChessRookWhite2();
+		pass2CommonActions();
+		renderer.renderWorldObject(chessRookWhite2.getVBOIndex(), chessRookWhite2.getNumVertices(), chessRookWhite2.getVBONIndex());
+
+		// renderer.setGoldMaterial();
+		// renderer.setupLights(elapsedTimeOffset);	
+		// mMat.identity();
+		// updateChessPawn();
+		// pass2CommonActions();
+		// renderer.renderWorldObject(chessPawn1.getVBOIndex(), chessPawn1.getNumVertices(), chessPawn1.getVBONIndex());
+	}
+
+	private void pass1CommonActions() {
+		shadowMVP1.identity();
+		shadowMVP1.mul(lightPmat);
+		shadowMVP1.mul(lightVmat);
+		shadowMVP1.mul(mMat);
+		renderer.setSUniformVar(shadowMVP1);
+	}
+
+	private void pass2CommonActions() {
 		mMat.invert(invTrMat);
 		invTrMat.transpose(invTrMat);
 
@@ -324,161 +437,166 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		shadowMVP2.mul(mMat);
 		
 		renderer.setMainShaderUniVars(mMat, vMat, pMat, invTrMat, shadowMVP2);
-		renderer.renderWorldObject(waterTankBox1.getVBOIndex(), waterTankBox1.getNumVertices(), waterTankBox1.getVBONIndex());
-		// ***** Using different shaderPrograms *****
-		// mMat.identity();
 	}
-
-	private void renderWorldObjectsP1() {
-
-		// * Dolphin Object
-		// renderer.setupLights(elapsedTimeOffset);
-		mMat.identity();
-		updateDolphin();
-
-		// mMat.invert(invTrMat);
-		// invTrMat.transpose(invTrMat);
-
-		shadowMVP1.identity();
-		shadowMVP1.mul(lightPmat);
-		shadowMVP1.mul(lightVmat);
-		shadowMVP1.mul(mMat);
-
-		// renderer.setMainShaderUniVars(mMat, vMat, pMat, invTrMat, shadowMVP1);
-		renderer.setSUniformVar(shadowMVP1);
-		renderer.renderWorldObject(dol.getVBOIndex(), dol.getNumVertices(), dol.getVBOTxIndex(), dolTexture, dol.getVBONIndex());
-
-
-
-		// renderer.setupLights(elapsedTimeOffset);
-		mMat.identity();
-		updateWaterTank();
-
-		// mMat.invert(invTrMat);
-		// invTrMat.transpose(invTrMat);
-
-		shadowMVP1.identity();
-		shadowMVP1.mul(lightPmat);
-		shadowMVP1.mul(lightVmat);
-		shadowMVP1.mul(mMat);
-
-		// renderer.setMainShaderUniVars(mMat, vMat, pMat, invTrMat, shadowMVP1);
-		renderer.setSUniformVar(shadowMVP1);
-		renderer.renderWorldObject(waterTank.getVBOIndex(), waterTank.getNumVertices(), waterTank.getVBOTxIndex(), waterTankTexture, waterTank.getVBONIndex());
 	
+	// /** Multiply the View and Model matrices to the Model-View identity matrix */
+	// private void updateMMatrix() {
+	// 	renderer.setupLights(elapsedTimeOffset);
+	// 	mMat.invert(invTrMat);
+	// 	invTrMat.transpose(invTrMat);
+	// 	renderer.setMVPUniformVars(mMat, vMat, pMat, invTrMat);
+	// }
 
+	private void updateChessBoard() {
+		chessBoard.update(elapsedTimeOffset);
+		currObjLoc = chessBoard.getLocation();
 
-		// renderer.setGoldMaterial();
-		renderer.setupLights(elapsedTimeOffset);
-		
-		mMat.identity();
-		updateWaterTankBox1();
-
-		// renderer.setupLights(elapsedTimeOffset);
-		// mMat.invert(invTrMat);
-		// invTrMat.transpose(invTrMat);
-
-		shadowMVP1.identity();
-		shadowMVP1.mul(lightPmat);
-		shadowMVP1.mul(lightVmat);
-		shadowMVP1.mul(mMat);
-		
-		// renderer.setMainShaderUniVars(mMat, vMat, pMat, invTrMat, shadowMVP1);
-		renderer.setSUniformVar(shadowMVP1);
-		renderer.renderWorldObject(waterTankBox1.getVBOIndex(), waterTankBox1.getNumVertices(), waterTankBox1.getVBONIndex());
-		// ***** Using different shaderPrograms *****
-		// mMat.identity();
-	}
-
-	/** Multiply the View and Model matrices to the Model-View identity matrix */
-	private void updateMMatrix() {
-		renderer.setupLights(elapsedTimeOffset);
-		mMat.invert(invTrMat);
-		invTrMat.transpose(invTrMat);
-		renderer.setMVPUniformVars(mMat, vMat, pMat, invTrMat);
-	}
-
-	/* Objects Used */
-	private void updateDolphin() {
-		dol.update(elapsedTimeOffset);
-		
-		
-		currObjLoc = dol.getLocation();
-
-		// if (currObjLoc.x >= 15f) { mMat.rotate(135, 0.0f, 1.0f, 0.0f); }
-		
-		// x = currObjLoc.x() + elapsedTimeOffset * dol.getXDirection();
 		x = currObjLoc.x();
 		y = currObjLoc.y();
-		// z = currObjLoc.z() + elapsedTimeOffset * dol.getZDirection();
 		z = currObjLoc.z();
 		
-		dol.setLocation(x, y, z);
+		chessBoard.setLocation(x, y, z);
 		
 		mMat.translation(x, y, z);
-		mMat.scale(2.0f, 2.0f, 2.0f);
-		mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
-		// if (dol.getXDirection() < 0) { mMat.rotate(-1.0f, 0.0f, 1.0f, 0.0f); }
-		// else {mMat.rotate(2f, 0.0f, 1.0f, 0.0f);}
+		// mMat.scale(0.75f, 0.75f, 0.75f);
+		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 
-		// updateMMatrix();
-		// renderer.setupLights(elapsedTimeOffset);
-		// mMat.invert(invTrMat);
-		// invTrMat.transpose(invTrMat);
-
-		// shadowMVP2.identity();
-		// shadowMVP2.mul(b);
-		// shadowMVP2.mul(lightPmat);
-		// shadowMVP2.mul(lightVmat);
-		// shadowMVP2.mul(mMat);
-		
-		// renderer.setMainShaderUniVars(mMat, vMat, pMat, invTrMat, shadowMVP2);
-		// renderer.renderWorldObject(dol.getVBOIndex(), dol.getNumVertices(), dol.getVBOTxIndex(), dolTexture, dol.getVBONIndex());
 	}
 
-	private void updateWaterTank() {
-		waterTank.update(elapsedTimeOffset);
-		currObjLoc = waterTank.getLocation();
+	private void updateChessKingWhite() {
+		chessKingWhite.update(elapsedTimeOffset);
+		currObjLoc = chessKingWhite.getLocation();
 
 		x = currObjLoc.x();
 		y = currObjLoc.y();
-		// z = currObjLoc.z() + elapsedTimeOffset * waterTank.getZDirection();
 		z = currObjLoc.z();
+		
+		chessKingWhite.setLocation(x, y, z);
+		
+		mMat.translation(x-2.5f, y, z-14f);
+		// mMat.scale(0.75f, 0.75f, 0.75f);
+		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 
-		waterTank.setLocation(x, y, z);
+	}
+
+	private void updateChessKingBlack() {
+		chessKingBlack.update(elapsedTimeOffset);
+		currObjLoc = chessKingBlack.getLocation();
+
+		x = currObjLoc.x();
+		y = currObjLoc.y();
+		z = currObjLoc.z();
+		
+		chessKingBlack.setLocation(x, y, z);
 		
 		mMat.translation(x, y, z);
-		mMat.scale(0.5f, 0.5f, 0.4f);
-		mMat.rotate((float)Math.toRadians(90.0f), 0f,1f,0f);
-		
-		// if (boat.getZDirection() < 0) mMat.rotate(135, 0.0f, 1.0f, 0.0f);
-		// renderer.setNeutralWhiteMaterial();
-		// renderer.setupLights(elapsedTimeOffset);
-		// updateMMatrix();
+		// mMat.scale(0.75f, 0.75f, 0.75f);
+		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 
-		// renderer.renderWorldObject(waterTank.getVBOIndex(), waterTank.getNumVertices(), waterTank.getVBOTxIndex(), waterTankTexture, waterTank.getVBONIndex());
 	}
 
-	private void updateWaterTankBox1() {
-		waterTankBox1.update(elapsedTimeOffset, 0.0f, 5.0f); // pyramid 2
+	// private void updateChessQueen() {
+	// 	chessQueen1.update(elapsedTimeOffset);
+	// 	currObjLoc = chessQueen1.getLocation();
 
-		currObjLoc = waterTankBox1.getLocation();
+	// 	x = currObjLoc.x();
+	// 	y = currObjLoc.y();
+	// 	z = currObjLoc.z();
+		
+	// 	chessQueen1.setLocation(x, y, z);
+		
+	// 	mMat.translation(x, y, z);
+	// 	mMat.scale(0.75f, 0.75f, 0.75f);
+	// 	// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
+
+	// }
+
+
+	// private void updateChessBishop() {
+	// 	chessBishop1.update(elapsedTimeOffset);
+	// 	currObjLoc = chessBishop1.getLocation();
+
+	// 	x = currObjLoc.x();
+	// 	y = currObjLoc.y();
+	// 	z = currObjLoc.z();
+		
+	// 	chessBishop1.setLocation(x, y, z);
+		
+	// 	mMat.translation(x, y, z);
+	// 	mMat.scale(0.75f, 0.75f, 0.75f);
+	// 	// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
+
+	// }
+
+
+	// private void updateChessKnight() {
+	// 	chessKnight1.update(elapsedTimeOffset);
+	// 	currObjLoc = chessKnight1.getLocation();
+
+	// 	x = currObjLoc.x();
+	// 	y = currObjLoc.y();
+	// 	z = currObjLoc.z();
+		
+	// 	chessKnight1.setLocation(x, y, z);
+		
+	// 	mMat.translation(x, y, z);
+	// 	mMat.scale(0.75f, 0.75f, 0.75f);
+	// 	// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
+
+	// }
+
+
+	private void updateChessRookWhite1() {
+		chessRookWhite1.update(elapsedTimeOffset);
+		currObjLoc = chessRookWhite1.getLocation();
+
 		x = currObjLoc.x();
 		y = currObjLoc.y();
 		z = currObjLoc.z();
-
-		waterTankBox1.setLocation(x,y,z);
-
-		mMat.translation(x-3.0f, y-1.0f, z-1f);	
-		// mMat.rotate(waterTankBox1.getRotationAngle(), 0.0f, 1.0f, 0.0f);
-		mMat.scale(2f, 1f, 2f);
 		
-		// renderer.setGoldMaterial();
-		// renderer.setupLights(elapsedTimeOffset);
-		// updateMMatrix();
+		chessRookWhite1.setLocation(x, y, z);
+		
+		mMat.translation(x-11f, y, z-2f);
+		// mMat.scale(0.75f, 0.75f, 0.75f);
+		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 
-		// renderer.renderWorldObject(waterTankBox1.getVBOIndex(), waterTankBox1.getNumVertices(), waterTankBox1.getVBONIndex());
 	}
+
+	private void updateChessRookWhite2() {
+		chessRookWhite2.update(elapsedTimeOffset);
+		currObjLoc = chessRookWhite2.getLocation();
+
+		x = currObjLoc.x();
+		y = currObjLoc.y();
+		z = currObjLoc.z();
+		
+		chessRookWhite2.setLocation(x, y, z);
+		
+		mMat.translation(x+5f, y, z-14f);
+		// mMat.scale(0.75f, 0.75f, 0.75f);
+		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
+
+	}
+
+
+	// private void updateChessPawn() {
+	// 	chessPawn1.update(elapsedTimeOffset);
+	// 	currObjLoc = chessPawn1.getLocation();
+
+	// 	x = currObjLoc.x();
+	// 	y = currObjLoc.y();
+	// 	z = currObjLoc.z();
+		
+	// 	chessPawn1.setLocation(x, y, z);
+		
+	// 	mMat.translation(x, y, z);
+	// 	mMat.scale(0.75f, 0.75f, 0.75f);
+	// 	// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
+
+	// }
+
+
+
 
 
 	// Deals with elapsed time and ensure that the values stay close

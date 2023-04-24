@@ -68,7 +68,7 @@ public class Renderer {
 
     public Renderer() {
         vao = new int[3];
-        vbo = new int[20];  
+        vbo = new int[25];  
         lightPos = new float[3];
 
         initialLightLoc = new Vector3f(2.0f, 7f, 2f);

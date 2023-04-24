@@ -1,0 +1,20 @@
+create a chess scene that is on top of some platform
+
+objects to create:
+
+Objects:
+  - Chess Board
+  - Chess pieces:
+    - NOTE: choose materials that will make the pieces look good!
+    - King
+    - Queen
+    - Bishop
+    - Knight
+    - Rook
+    - Pawn
+  - Rooftop  (possibly as a height map)
+  - Table/platform
+
+Skybox:
+  - create a skyline
+  - or create a field with grass and trees and a pond (simulating water and knocking out the project requirements)
