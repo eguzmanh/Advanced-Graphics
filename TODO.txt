@@ -18,3 +18,24 @@ Objects:
 Skybox:
   - create a skyline
   - or create a field with grass and trees and a pond (simulating water and knocking out the project requirements)
+
+
+
+Mae a sybox scene that will show a cloudy envirronment and create heigh mapping techniques that will simulate
+a rased grassy area where a lake will be beside it
+
+# THings to implement
+
+
+- find an object that can be used in the scene as a mirror like object, such as 
+Implement water with reflection and fresner effect
+
+  - potentially implement a cup of water that has reflection and fresner effect
+    
+    create a relflected objet that can have the chrome properties that are necessary for the
+    mirror that can show the environmeent mapping
+
+    - if the sybox has a night city skyline from a rooftop. then you can use the cup of water idea
+    - 
+
+    us normal mapping on the chess board to simulate a more granular

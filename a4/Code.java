@@ -93,6 +93,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 	private int lastX, lastY, lastVarsSet = 0;
 
+	private int rendererPassStatus;
+
 
 	// **************** Constructor(s) ****************************
 	public Code() {	
@@ -131,6 +133,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		renderer.bindVertextAttributeData();
 		
 		bindWorldObjects();
+
+		rendererPassStatus = 1;;
 	}
 	
 	private void setupShadowBuffers() {
@@ -294,7 +298,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		renderer.useLightDotShader();
 		renderLightDot();
 
-		
 		renderer.prepPass1GLData();
 		renderer.useMainShadowShader();
 		// passOne();
@@ -330,6 +333,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 
 	private void renderWorldObjectsP1() {
+		rendererPassStatus = 1;
+
 		mMat.identity();
 		updateChessBoard();
 		pass1CommonActions();
@@ -377,6 +382,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	}
 
 	private void renderWorldObjectsP2() {
+		rendererPassStatus = 2;
 
 		mMat.identity();
 		updateChessBoard();
@@ -459,7 +465,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		chessBoard.setLocation(x, y, z);
 		
 		mMat.translation(x, y, z);
-		// mMat.scale(0.75f, 0.75f, 0.75f);
+
+		// if(rendererPassStatus == 1) {
+		// 	mMat.scale(0.5f, 0.5f, 0.5f);
+		// }
 		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 
 	}
@@ -475,6 +484,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		chessKingWhite.setLocation(x, y, z);
 		
 		mMat.translation(x-2.5f, y, z-14f);
+
+		// if(rendererPassStatus == 1) {
+		// 	mMat.scale(0.75f, 0.75f, 0.75f);
+		// }
 		// mMat.scale(0.75f, 0.75f, 0.75f);
 		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 
@@ -491,6 +504,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		chessKingBlack.setLocation(x, y, z);
 		
 		mMat.translation(x+2f, y, z+2.5f);
+
+		// if(rendererPassStatus == 1) {
+		// 	mMat.scale(0.75f, 0.75f, 0.75f);
+		// }
 		// mMat.scale(0.75f, 0.75f, 0.75f);
 		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 
@@ -558,6 +575,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		chessRookWhite1.setLocation(x, y, z);
 		
 		mMat.translation(x-11f, y, z-2f);
+
+		// if(rendererPassStatus == 1) {
+		// 	mMat.scale(0.75f, 0.75f, 0.75f);
+		// }
 		// mMat.scale(0.75f, 0.75f, 0.75f);
 		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 
@@ -574,6 +595,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		chessRookWhite2.setLocation(x, y, z);
 		
 		mMat.translation(x+5f, y, z);
+
+		// if(rendererPassStatus == 1) {
+		// 	mMat.scale(0.75f, 0.75f, 0.75f);
+		// }
 		// mMat.scale(0.75f, 0.75f, 0.75f);
 		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 

@@ -45,24 +45,8 @@ vec4 tcolor;
 vec4 lcolor;
 
 
-float lookup(float ox, float oy) {
-	float t = textureProj(shadowTex, shadow_coord + vec4(ox * 0.001 * shadow_coord.w, oy * 0.001 * shadow_coord.w, -0.01, 0.0));
-	return t;
-}
-
 void main(void) {	
-
-	// PCF filtering being added into the program
-	float shadowFactor = 0.0;
-	float swidth = 2.5;
-	vec2 offset = mod(floor(gl_FragCoord.xy), 2.0) * swidth;
-	shadowFactor += lookup(-1.5*swidth + offset.x, 1.5*swidth-offset.y);
-	shadowFactor += lookup(-1.5*swidth + offset.x, -0.5*swidth-offset.y);
-	shadowFactor += lookup(0.5*swidth + offset.x, 1.5*swidth-offset.y);
-	shadowFactor += lookup(0.5*swidth + offset.x, -0.5*swidth-offset.y);
-	shadowFactor = shadowFactor / 4.0;
-
-
+	
 	// normalize the light, normal, and view vectors:
 	vec3 L = normalize(varyingLightDir);
 	vec3 N = normalize(varyingNormal);
@@ -81,29 +65,28 @@ void main(void) {
 	
 	// compute ADS contributions (per pixel):
 	
-	//float notInShadow = textureProj(shadowTex, shadow_coord);
+	float notInShadow = textureProj(shadowTex, shadow_coord);
 
 	if(textureStatus == 0) { 
 		ambient = ((globalAmbient * material.ambient) + (light.ambient * material.ambient)).xyz;
-		if(lightStatus == 1.0) {
+		lcolor = vec4(ambient, 1.0);
+		if(lightStatus == 1.0 && notInShadow == 1.0) {
 				diffuse = light.diffuse.xyz * material.diffuse.xyz * max(cosTheta,0.0);
 				specular = light.specular.xyz * material.specular.xyz * pow(max(cosPhi,0.0), material.shininess*3.0);
-				lcolor = vec4(ambient + shadowFactor*(diffuse + specular), 1.0);
-		} else {
-			lcolor = vec4(ambient, 1.0);
+				lcolor += vec4((diffuse + specular), 1.0);
 		}
 		fragColor = lcolor;
 	} 
 	else if (textureStatus == 1) { 
 		ambient = ((globalAmbient) + (light.ambient)).xyz;
-		if(lightStatus == 1.0) {
+		lcolor = vec4(ambient, 1.0);
+		if(lightStatus == 1.0 && notInShadow == 1.0) {
 				diffuse = light.diffuse.xyz * max(cosTheta,0.0);
 				specular = light.specular.xyz * pow(max(cosPhi,0.0), 1.0);
-				lcolor += vec4(ambient + shadowFactor*(diffuse + specular), 1.0);
-		} else {
-			lcolor = vec4(ambient, 1.0);
+				lcolor += vec4((diffuse + specular), 1.0);
 		}
 		
+
 		tcolor = texture(samp, tc);
 		fragColor = tcolor * lcolor;
 
