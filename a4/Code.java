@@ -72,10 +72,18 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	
 	// private ImportedModel dolphinObj, waterTankObj;
 	private ImportedModel chessBoardObj, chessKingObj, chessQueenObj, chessBishopObj, chessKnightObj, chessRookObj, chessPawnObj;
+	private ImportedModel groundObj;
+	
+
+	private float terLocX, terLocY, terLocZ;
+	private int rockyTexture;
+	private int heightMap;
+
+	private Ground ground;
 
 	private Cube skyboxCube;
 	// private Dolphin dol;
-	// private WaterTank waterTank;
+	// private WaterTank water Tank;
 	// private Cube waterTankBox1;
 	private ChessBoard chessBoard;
 
@@ -87,7 +95,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	// private int dolTexture, skyboxTexture, waterTankTexture;
 	private int skyboxTexture, chessBoardTexture;
 
-	
 	private Vector3f currObjLoc;
 	private float x,y,z;
 
@@ -125,12 +132,14 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		setPerspective();
 		loadObjects();
+
 		loadTextures();
 		buildWorldObjects();
 		
 		renderer.bindVertextAttributeData();
-		
+
 		bindWorldObjects();
+
 	}
 	
 	private void setupShadowBuffers() {
@@ -219,6 +228,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		skyboxTexture = Utils.loadCubeMap("assets/cubeMaps/space/red");
 		// waterTankTexture = Utils.loadTexture("assets/textures/water-tank/colour.png");
 		chessBoardTexture = Utils.loadTexture("assets/textures/chess/WoodenChessBoard_diffuse.jpg");
+		renderer.init3DMarbleTexture();
 	}
 
 	private void buildWorldObjects() {	
@@ -260,10 +270,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		// renderer.bindWorldObjectWNormals(waterTankBox1, waterTankBox1.getVertices(), waterTankBox1.getNormals());
 		
 		renderer.bindTexturedWorldObject(chessBoard, chessBoard.getVertices(), chessBoard.getTextureCoordinates(), chessBoard.getNormals());
-		renderer.bindWorldObjectWNormals(chessKingWhite, chessKingWhite.getVertices(), chessKingWhite.getNormals());
-		renderer.bindWorldObjectWNormals(chessKingBlack, chessKingBlack.getVertices(), chessKingBlack.getNormals());
-		renderer.bindWorldObjectWNormals(chessRookWhite1, chessRookWhite1.getVertices(), chessRookWhite1.getNormals());
-		renderer.bindWorldObjectWNormals(chessRookWhite2, chessRookWhite2.getVertices(), chessRookWhite2.getNormals());
+		renderer.bindTexturedWorldObject(chessKingWhite, chessKingWhite.getVertices(), chessKingWhite.getTextureCoordinates(), chessKingWhite.getNormals());
+		renderer.bindTexturedWorldObject(chessKingBlack, chessKingBlack.getVertices(), chessKingBlack.getTextureCoordinates(), chessKingBlack.getNormals());
+		renderer.bindTexturedWorldObject(chessRookWhite1, chessRookWhite1.getVertices(), chessRookWhite1.getTextureCoordinates(), chessRookWhite1.getNormals());
+		renderer.bindTexturedWorldObject(chessRookWhite2, chessRookWhite2.getVertices(), chessRookWhite2.getTextureCoordinates(), chessRookWhite2.getNormals());
 
 		// renderer.bindWorldObjectWNormals(chessQueen1, chessQueen1.getVertices(), chessQueen1.getNormals());
 		// renderer.bindWorldObjectWNormals(chessBishop1, chessBishop1.getVertices(), chessBishop1.getNormals());
@@ -388,28 +398,31 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		mMat.identity();
 		updateChessKingWhite();
 		pass2CommonActions();
-		renderer.renderWorldObject(chessKingWhite.getVBOIndex(), chessKingWhite.getNumVertices(), chessKingWhite.getVBONIndex());
+		renderer.renderTexturedMaterialWorldObject(chessKingWhite.getVBOIndex(), chessKingWhite.getNumVertices(), chessKingWhite.getVBOTxIndex(), renderer.get3DMarbleTexture1(), chessKingWhite.getVBONIndex());
 
 		renderer.setAmethystMaterial();
 		renderer.setupLights(elapsedTimeOffset);	
 		mMat.identity();
 		updateChessKingBlack();
 		pass2CommonActions();
-		renderer.renderWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBONIndex());
+		renderer.renderTexturedMaterialWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBOTxIndex(), renderer.get3DMarbleTexture2(), chessKingBlack.getVBONIndex());
+		// renderer.renderWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBONIndex());
 
 		renderer.setGoldMaterial();
 		renderer.setupLights(elapsedTimeOffset);	
 		mMat.identity();
 		updateChessRookWhite1();
 		pass2CommonActions();
-		renderer.renderWorldObject(chessRookWhite1.getVBOIndex(), chessRookWhite1.getNumVertices(), chessRookWhite1.getVBONIndex());
+		renderer.renderTexturedMaterialWorldObject(chessRookWhite1.getVBOIndex(), chessRookWhite1.getNumVertices(), chessRookWhite1.getVBOTxIndex(), renderer.get3DMarbleTexture1(), chessRookWhite1.getVBONIndex());
+		// renderer.renderWorldObject(chessRookWhite1.getVBOIndex(), chessRookWhite1.getNumVertices(), chessRookWhite1.getVBONIndex());
 
 		renderer.setGoldMaterial();
 		renderer.setupLights(elapsedTimeOffset);	
 		mMat.identity();
 		updateChessRookWhite2();
 		pass2CommonActions();
-		renderer.renderWorldObject(chessRookWhite2.getVBOIndex(), chessRookWhite2.getNumVertices(), chessRookWhite2.getVBONIndex());
+		renderer.renderTexturedMaterialWorldObject(chessRookWhite2.getVBOIndex(), chessRookWhite2.getNumVertices(), chessRookWhite2.getVBOTxIndex(), renderer.get3DMarbleTexture1(), chessRookWhite2.getVBONIndex());
+		// renderer.renderWorldObject(chessRookWhite2.getVBOIndex(), chessRookWhite2.getNumVertices(), chessRookWhite2.getVBONIndex());
 
 		// renderer.setGoldMaterial();
 		// renderer.setupLights(elapsedTimeOffset);	

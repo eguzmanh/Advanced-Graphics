@@ -5,6 +5,8 @@ import java.util.HashMap;
 import org.joml.*;
 import java.lang.Math;
 
+import java.awt.Color;
+
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.*;
 import com.jogamp.opengl.GLContext;
@@ -19,7 +21,7 @@ public class Renderer {
 	public int vao[];
 	public int vbo[];
     private int currVboIndex;
-    private int mLoc, vLoc, pLoc, nLoc, sLoc; 
+    private int mLoc, vLoc, pLoc, nLoc, sLoc, alphaLoc, flipLoc;; 
 
     private int lightLoc, globalAmbLoc, ambLoc, diffLoc, specLoc, posLoc, mambLoc, mdiffLoc, mspecLoc, mshiLoc;
 
@@ -84,6 +86,172 @@ public class Renderer {
 
         setDefaultMaterial();
     }
+
+
+    private int noiseTexture1, noiseTexture2;
+	private int noiseWidth = 256;
+	private int noiseHeight= 256;
+	private int noiseDepth = 256;
+	private double[][][] noise = new double[noiseWidth][noiseHeight][noiseDepth];
+	private java.util.Random random = new java.util.Random();
+
+    private Color c;
+
+
+    public void init3DMarbleTexture() {
+        generateNoise();	
+		noiseTexture1 = buildNoiseTexture1();
+        noiseTexture2 = buildNoiseTexture2();
+    }
+
+    public int get3DMarbleTexture1() {
+        return noiseTexture1;
+    }
+    public int get3DMarbleTexture2() {
+        return noiseTexture2;
+    }
+
+	private void fillDataArray(byte data[])
+	{ double veinFrequency = 4.0;
+	  double turbPower = 3.0;
+	  double maxZoom =  32.0;
+	  for (int i=0; i<noiseWidth; i++)
+	  { for (int j=0; j<noiseHeight; j++)
+	    { for (int k=0; k<noiseDepth; k++)
+	      {	double xyzValue = (float)i/noiseWidth + (float)j/noiseHeight + (float)k/noiseDepth
+							+ turbPower * turbulence(i,j,k,maxZoom)/256.0;
+
+		double sineValue = logistic(Math.abs(Math.sin(xyzValue * 3.14159 * veinFrequency)));
+		sineValue = Math.max(-1.0, Math.min(sineValue*1.25-0.20, 1.0));
+
+		c = new Color((float)sineValue,
+				(float)Math.min(sineValue*1.5-0.25, 1.0),
+				(float)sineValue);
+
+	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+0] = (byte) c.getRed();
+	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+1] = (byte) c.getGreen();
+	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+2] = (byte) c.getBlue();
+	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+3] = (byte) 255;
+	} } } }
+
+    private void fillDataArray2(byte data[])
+	{ double veinFrequency = 4.0;
+	  double turbPower = 3.0;
+	  double maxZoom =  32.0;
+	  for (int i=0; i<noiseWidth; i++)
+	  { for (int j=0; j<noiseHeight; j++)
+	    { for (int k=0; k<noiseDepth; k++)
+	      {	double xyzValue = (float)i/noiseWidth + (float)j/noiseHeight + (float)k/noiseDepth
+							+ turbPower * turbulence(i,j,k,maxZoom)/256.0;
+
+		double sineValue = logistic(Math.abs(Math.sin(xyzValue * 3.14159 * veinFrequency)));
+		sineValue = Math.max(-1.0, Math.min(sineValue*1.25-0.20, 1.0));
+
+		c = new Color((float)sineValue,
+				(float)Math.min(sineValue*3.5-0.25, 1.0),
+				(float)sineValue);
+
+	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+0] = (byte) c.getRed();
+	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+1] = (byte) c.getGreen();
+	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+2] = (byte) c.getBlue();
+	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+3] = (byte) 255;
+	} } } }
+	
+	private int buildNoiseTexture1()
+	{	GL4 gl = (GL4) GLContext.getCurrentGL();
+
+		byte[] data = new byte[noiseWidth*noiseHeight*noiseDepth*4];
+		
+		fillDataArray(data);
+
+		ByteBuffer bb = Buffers.newDirectByteBuffer(data);
+
+		int[] textureIDs = new int[1];
+		gl.glGenTextures(1, textureIDs, 0);
+		int textureID = textureIDs[0];
+
+		gl.glBindTexture(GL_TEXTURE_3D, textureID);
+
+		gl.glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA8, noiseWidth, noiseHeight, noiseDepth);
+		gl.glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0,
+				noiseWidth, noiseHeight, noiseDepth, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, bb);
+		
+		gl.glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		return textureID;
+	}
+
+    private int buildNoiseTexture2()
+	{	GL4 gl = (GL4) GLContext.getCurrentGL();
+
+		byte[] data = new byte[noiseWidth*noiseHeight*noiseDepth*4];
+		
+		fillDataArray2(data);
+
+		ByteBuffer bb = Buffers.newDirectByteBuffer(data);
+
+		int[] textureIDs = new int[1];
+		gl.glGenTextures(1, textureIDs, 0);
+		int textureID = textureIDs[0];
+
+		gl.glBindTexture(GL_TEXTURE_3D, textureID);
+
+		gl.glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA8, noiseWidth, noiseHeight, noiseDepth);
+		gl.glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0,
+				noiseWidth, noiseHeight, noiseDepth, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, bb);
+		
+		gl.glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		return textureID;
+	}
+
+	void generateNoise()
+	{	for (int x=0; x<noiseWidth; x++)
+		{	for (int y=0; y<noiseHeight; y++)
+			{	for (int z=0; z<noiseDepth; z++)
+				{	noise[x][y][z] = random.nextDouble();
+	}	}	}	}
+	
+	double smoothNoise(double zoom, double x1, double y1, double z1)
+	{	//get fractional part of x, y, and z
+		double fractX = x1 - (int) x1;
+		double fractY = y1 - (int) y1;
+		double fractZ = z1 - (int) z1;
+
+		//neighbor values that wrap
+		double x2 = x1 - 1; if (x2<0) x2 = (Math.round(noiseWidth / zoom)) - 1;
+		double y2 = y1 - 1; if (y2<0) y2 = (Math.round(noiseHeight / zoom)) - 1;
+		double z2 = z1 - 1; if (z2<0) z2 = (Math.round(noiseDepth / zoom)) - 1;
+
+		//smooth the noise by interpolating
+		double value = 0.0;
+		value += fractX       * fractY       * fractZ       * noise[(int)x1][(int)y1][(int)z1];
+		value += (1.0-fractX) * fractY       * fractZ       * noise[(int)x2][(int)y1][(int)z1];
+		value += fractX       * (1.0-fractY) * fractZ       * noise[(int)x1][(int)y2][(int)z1];	
+		value += (1.0-fractX) * (1.0-fractY) * fractZ       * noise[(int)x2][(int)y2][(int)z1];
+				
+		value += fractX       * fractY       * (1.0-fractZ) * noise[(int)x1][(int)y1][(int)z2];
+		value += (1.0-fractX) * fractY       * (1.0-fractZ) * noise[(int)x2][(int)y1][(int)z2];
+		value += fractX       * (1.0-fractY) * (1.0-fractZ) * noise[(int)x1][(int)y2][(int)z2];
+		value += (1.0-fractX) * (1.0-fractY) * (1.0-fractZ) * noise[(int)x2][(int)y2][(int)z2];
+		
+		return value;
+	}
+
+	private double turbulence(double x, double y, double z, double maxZoom)
+	{	double sum = 0.0, zoom = maxZoom;
+		while(zoom >= 0.9)
+		{	sum = sum + smoothNoise(zoom, x/zoom, y/zoom, z/zoom) * zoom;
+			zoom = zoom / 2.0;
+		}
+		sum = 128.0 * sum / maxZoom;
+		return sum;
+	}
+
+	private double logistic(double x)
+	{	double k = 3.0;
+		return (1.0/(1.0+Math.pow(2.718,-k*x)));
+	}
 
 
     public void setAmethystMaterial() {
@@ -213,10 +381,13 @@ public class Renderer {
 		pLoc = gl.glGetUniformLocation(shaders.get("mainShader"), "p_matrix");
 		nLoc = gl.glGetUniformLocation(shaders.get("mainShader"), "norm_matrix");
         sLoc = gl.glGetUniformLocation(shaders.get("mainShader"), "shadowMVP");
-
+        alphaLoc = gl.glGetUniformLocation(shaders.get("mainShader"), "alpha");
+		flipLoc = gl.glGetUniformLocation(shaders.get("mainShader") , "flipNormal");
         // include a texture flag in order to use the correct material light properties
         glTextureStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "textureStatus");
         lightStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "lightStatus");
+
+        
     }
 
     public void useCubeMapShader() { 
@@ -299,6 +470,36 @@ public class Renderer {
     }
     
     /** Bind objects with a texture */
+    public void renderTexturedMaterialWorldObject(int vboObjId,int numVertices, int vboTxId, int texture, int vboNId) {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        gl.glUniform1i(glTextureStatus, 2);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
+		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(0);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboTxId]);
+		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+        
+        
+        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboNId]);
+		gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+        
+		gl.glActiveTexture(GL_TEXTURE2);
+		gl.glBindTexture(GL_TEXTURE_3D, texture);
+        
+		gl.glEnable(GL_CULL_FACE);
+		gl.glFrontFace(GL_CCW);
+		gl.glEnable(GL_DEPTH_TEST);
+		gl.glDepthFunc(GL_LEQUAL);
+
+
+		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
+	}
+
 	public void renderWorldObject(int vboObjId,int numVertices, int vboTxId, int texture, int vboNId) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
 
@@ -312,13 +513,13 @@ public class Renderer {
 		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(1);
         
-		gl.glActiveTexture(GL_TEXTURE0);
-		gl.glBindTexture(GL_TEXTURE_2D, texture);
-
+        
         gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboNId]);
 		gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(1);
         
+		gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_2D, texture);
         
 		gl.glEnable(GL_CULL_FACE);
 		gl.glFrontFace(GL_CCW);
@@ -366,13 +567,13 @@ public class Renderer {
 		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(1);
         
-		gl.glActiveTexture(GL_TEXTURE0);
-		gl.glBindTexture(GL_TEXTURE_2D, texture);
-
+        
         gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboNId]);
 		gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
 		gl.glEnableVertexAttribArray(1);
         
+		gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_2D, texture);
         
 		gl.glClear(GL_DEPTH_BUFFER_BIT);
 		gl.glEnable(GL_CULL_FACE);
@@ -416,6 +617,9 @@ public class Renderer {
         gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals16f));
         gl.glUniformMatrix4fv(nLoc, 1, false, nMat.get(vals16f));
         gl.glUniformMatrix4fv(sLoc, 1, false, sMat.get(vals16f));
+        gl.glUniform1f(alphaLoc, 1.0f);
+        gl.glUniform1f(flipLoc, 1.0f);
+        
 
     }
 
@@ -463,8 +667,8 @@ public class Renderer {
     public void clearGL() {
         GL4 gl = (GL4) GLContext.getCurrentGL();
         gl.glClear(GL_COLOR_BUFFER_BIT);
+		gl.glClearColor(0.7f, 0.8f, 0.9f, 1.0f);
 		gl.glClear(GL_DEPTH_BUFFER_BIT);
-		gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     public int getCurrVBOIndex() { return currVboIndex; }
