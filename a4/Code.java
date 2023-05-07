@@ -275,6 +275,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		renderer.bindTexturedWorldObject(chessRookWhite1, chessRookWhite1.getVertices(), chessRookWhite1.getTextureCoordinates(), chessRookWhite1.getNormals());
 		renderer.bindTexturedWorldObject(chessRookWhite2, chessRookWhite2.getVertices(), chessRookWhite2.getTextureCoordinates(), chessRookWhite2.getNormals());
 
+		
+		// ? for transparency, add a dead queen from the opposite scene since we are showing a checkmate scene and that queen is helpless
 		// renderer.bindWorldObjectWNormals(chessQueen1, chessQueen1.getVertices(), chessQueen1.getNormals());
 		// renderer.bindWorldObjectWNormals(chessBishop1, chessBishop1.getVertices(), chessBishop1.getNormals());
 		// renderer.bindWorldObjectWNormals(chessKnight1, chessKnight1.getVertices(), chessKnight1.getNormals());

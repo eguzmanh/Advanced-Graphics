@@ -140,7 +140,7 @@ void main(void) {
 		lcolor = vec4(ambient, 1.0);
 		if(lightStatus == 1.0) {
 				diffuse = light.diffuse.xyz * max(cosTheta,0.0);
-				specular = light.specular.xyz * pow(max(cosPhi,0.0), material.shininess);
+				specular = light.specular.xyz * pow(max(cosPhi,0.0), material.shininess*3);
 				lcolor += vec4(shadowFactor * (diffuse + specular), 1.0);
 		}
 		

@@ -112,9 +112,9 @@ public class Renderer {
     }
 
 	private void fillDataArray(byte data[])
-	{ double veinFrequency = 4.0;
-	  double turbPower = 3.0;
-	  double maxZoom =  32.0;
+	{ double veinFrequency = 20.0;
+	  double turbPower = 0.0;
+	  double maxZoom =  64.0;
 	  for (int i=0; i<noiseWidth; i++)
 	  { for (int j=0; j<noiseHeight; j++)
 	    { for (int k=0; k<noiseDepth; k++)
@@ -124,35 +124,40 @@ public class Renderer {
 		double sineValue = logistic(Math.abs(Math.sin(xyzValue * 3.14159 * veinFrequency)));
 		sineValue = Math.max(-1.0, Math.min(sineValue*1.25-0.20, 1.0));
 
-		c = new Color((float)sineValue,
-				(float)Math.min(sineValue*1.5-0.25, 1.0),
-				(float)sineValue);
-
+//		c = new Color(0.33f, 0.65f, (float)Math.min(sineValue*1.5-0.25, 1.0));
+		c = new Color((float)Math.min(sineValue*1.5-0.25, 1.0), 0.5f, 0.5f);
+        
+        
 	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+0] = (byte) c.getRed();
 	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+1] = (byte) c.getGreen();
 	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+2] = (byte) c.getBlue();
 	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+3] = (byte) 255;
-	} } } }
-
-    private void fillDataArray2(byte data[])
-	{ double veinFrequency = 4.0;
-	  double turbPower = 3.0;
-	  double maxZoom =  32.0;
+        } } } }
+        
+        private void fillDataArray2(byte data[])
+        { double veinFrequency = 20.0;
+            double turbPower = 0.0;
+	  double maxZoom =  64.0;
 	  for (int i=0; i<noiseWidth; i++)
 	  { for (int j=0; j<noiseHeight; j++)
 	    { for (int k=0; k<noiseDepth; k++)
-	      {	double xyzValue = (float)i/noiseWidth + (float)j/noiseHeight + (float)k/noiseDepth
-							+ turbPower * turbulence(i,j,k,maxZoom)/256.0;
-
-		double sineValue = logistic(Math.abs(Math.sin(xyzValue * 3.14159 * veinFrequency)));
+            {	double xyzValue = (float)i/noiseWidth + (float)j/noiseHeight + (float)k/noiseDepth
+                + turbPower * turbulence(i,j,k,maxZoom)/256.0;
+                
+                double sineValue = logistic(Math.abs(Math.sin(xyzValue * 3.14159 * veinFrequency)));
 		sineValue = Math.max(-1.0, Math.min(sineValue*1.25-0.20, 1.0));
 
-		c = new Color((float)sineValue,
-				(float)Math.min(sineValue*3.5-0.25, 1.0),
-				(float)sineValue);
-
-	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+0] = (byte) c.getRed();
-	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+1] = (byte) c.getGreen();
+        //		c = new Color((float)Math.min(sineValue*3.5-0.25, 1.0),
+        //          (float)sineValue,
+				//(float)sineValue);
+      //  c = new Color(0.77f,
+        //        (float)Math.min(sineValue*1.5-0.25, 0.64f),
+        //            0.52f
+        //      );
+        //c = new Color((float)Math.min(sineValue*1.5-0.25, 1.0), .76f, .58f);
+        c = new Color(0.7f, 0.7f, (float)Math.min(sineValue*1.5-0.25, 1.0));
+        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+0] = (byte) c.getRed();
+        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+1] = (byte) c.getGreen();
 	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+2] = (byte) c.getBlue();
 	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+3] = (byte) 255;
 	} } } }
