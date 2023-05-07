@@ -89,7 +89,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 	// ChessPieces for each side
 	// private ChessPiece chessKing1, chessQueen1, chessBishop1, chessKnight1, chessRook1, chessPawn1;
-	private ChessPiece chessKingWhite, chessKingBlack, chessRookWhite1, chessRookWhite2;
+	private ChessPiece chessKingWhite, chessKingBlack, chessRookWhite1, chessRookWhite2, chessQueenBlack, chessQueenWhite;
 	// private ChessPiece chessKing2, chessQueen2, chessBishop2, chessKnight2, chessRook2, chessPawn2;
 	
 	// private int dolTexture, skyboxTexture, waterTankTexture;
@@ -212,7 +212,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		chessKingObj = new ImportedModel("assets/models/chess/King.obj");
 		chessRookObj = new ImportedModel("assets/models/chess/Rook.obj");
 		
-		// chessQueenObj = new ImportedModel("assets/models/chess/Queen2.obj");
+		chessQueenObj = new ImportedModel("assets/models/chess/Queen2.obj");
 		// chessBishopObj = new ImportedModel("assets/models/chess/Bishop2.obj");
 		// chessKnightObj = new ImportedModel("assets/models/chess/Knight2.obj");
 		// chessPawnObj = new ImportedModel("assets/models/chess/Pawn.obj");
@@ -239,9 +239,12 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 		chessBoard = new ChessBoard("chessBoard", chessBoardObj);
 
-		chessKingWhite = new ChessPiece("chessPiece", chessKingObj);
 		chessKingBlack = new ChessPiece("chessPiece", chessKingObj);
+		chessKingWhite = new ChessPiece("chessPiece", chessKingObj);
 
+		chessQueenBlack = new ChessPiece("chessPiece", chessKingObj);
+		chessQueenWhite = new ChessPiece("chessPiece", chessKingObj);
+		
 		chessRookWhite1 = new ChessPiece("chessPiece", chessRookObj);
 		chessRookWhite2 = new ChessPiece("chessPiece", chessRookObj);
 		// chessKing1.setLocation(0.0f, 0.0f, 0.0f);
@@ -270,8 +273,13 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		// renderer.bindWorldObjectWNormals(waterTankBox1, waterTankBox1.getVertices(), waterTankBox1.getNormals());
 		
 		renderer.bindTexturedWorldObject(chessBoard, chessBoard.getVertices(), chessBoard.getTextureCoordinates(), chessBoard.getNormals());
+		
 		renderer.bindTexturedWorldObject(chessKingWhite, chessKingWhite.getVertices(), chessKingWhite.getTextureCoordinates(), chessKingWhite.getNormals());
 		renderer.bindTexturedWorldObject(chessKingBlack, chessKingBlack.getVertices(), chessKingBlack.getTextureCoordinates(), chessKingBlack.getNormals());
+
+        renderer.bindTexturedWorldObject(chessQueenBlack, chessQueenBlack.getVertices(), chessQueenBlack.getTextureCoordinates(), chessQueenBlack.getNormals());
+		renderer.bindTexturedWorldObject(chessQueenWhite, chessQueenWhite.getVertices(), chessQueenWhite.getTextureCoordinates(), chessQueenWhite.getNormals());
+
 		renderer.bindTexturedWorldObject(chessRookWhite1, chessRookWhite1.getVertices(), chessRookWhite1.getTextureCoordinates(), chessRookWhite1.getNormals());
 		renderer.bindTexturedWorldObject(chessRookWhite2, chessRookWhite2.getVertices(), chessRookWhite2.getTextureCoordinates(), chessRookWhite2.getNormals());
 
@@ -371,7 +379,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		// updateChessKnight();
 		// pass1CommonActions();
 		// renderer.renderWorldObject(chessKnight1.getVBOIndex(), chessKnight1.getNumVertices(), chessKnight1.getVBONIndex());
-
+		
+		
 		mMat.identity();
 		updateChessRookWhite1();
 		pass1CommonActions();
@@ -381,6 +390,16 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		updateChessRookWhite2();
 		pass1CommonActions();
 		renderer.renderWorldObject(chessRookWhite2.getVBOIndex(), chessRookWhite2.getNumVertices(), chessRookWhite2.getVBONIndex());
+		
+		mMat.identity();
+		updateChessQueenWhite();
+		pass1CommonActions();
+		renderer.renderWorldObject(chessQueenWhite.getVBOIndex(), chessQueenWhite.getNumVertices(), chessQueenWhite.getVBONIndex());
+
+		mMat.identity();
+		updateChessQueenBlack();
+		pass1CommonActions();
+		renderer.renderWorldObject(chessQueenBlack.getVBOIndex(), chessQueenBlack.getNumVertices(), chessQueenBlack.getVBONIndex());
 
 		// mMat.identity();
 		// updateChessPawn();
@@ -389,7 +408,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	}
 
 	private void renderWorldObjectsP2() {
-
+		
 		mMat.identity();
 		updateChessBoard();
 		pass2CommonActions();
@@ -401,15 +420,14 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		updateChessKingWhite();
 		pass2CommonActions();
 		renderer.renderTexturedMaterialWorldObject(chessKingWhite.getVBOIndex(), chessKingWhite.getNumVertices(), chessKingWhite.getVBOTxIndex(), renderer.get3DMarbleTexture1(), chessKingWhite.getVBONIndex());
-
+		
 		renderer.setAmethystMaterial();
 		renderer.setupLights(elapsedTimeOffset);	
 		mMat.identity();
 		updateChessKingBlack();
 		pass2CommonActions();
-		renderer.renderTexturedMaterialWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBOTxIndex(), renderer.get3DMarbleTexture2(), chessKingBlack.getVBONIndex());
-		// renderer.renderWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBONIndex());
-
+		renderer.renderAlphaTexturedMaterialObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBOTxIndex(), renderer.get3DMarbleTexture2(), chessKingBlack.getVBONIndex());
+		
 		renderer.setGoldMaterial();
 		renderer.setupLights(elapsedTimeOffset);	
 		mMat.identity();
@@ -425,7 +443,23 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		pass2CommonActions();
 		renderer.renderTexturedMaterialWorldObject(chessRookWhite2.getVBOIndex(), chessRookWhite2.getNumVertices(), chessRookWhite2.getVBOTxIndex(), renderer.get3DMarbleTexture1(), chessRookWhite2.getVBONIndex());
 		// renderer.renderWorldObject(chessRookWhite2.getVBOIndex(), chessRookWhite2.getNumVertices(), chessRookWhite2.getVBONIndex());
-
+		
+		renderer.setGoldMaterial();
+		renderer.setupLights(elapsedTimeOffset);	
+		mMat.identity();
+		updateChessQueenWhite();
+		pass2CommonActions();
+		renderer.renderAlphaTexturedMaterialObject(chessQueenWhite.getVBOIndex(), chessQueenWhite.getNumVertices(), chessQueenWhite.getVBOTxIndex(), renderer.get3DMarbleTexture1(), chessQueenWhite.getVBONIndex());
+		
+		renderer.setAmethystMaterial();
+		renderer.setupLights(elapsedTimeOffset);	
+		mMat.identity();
+		updateChessQueenBlack();
+		pass2CommonActions();
+		renderer.renderAlphaTexturedMaterialObject(chessQueenBlack.getVBOIndex(), chessQueenBlack.getNumVertices(), chessQueenBlack.getVBOTxIndex(), renderer.get3DMarbleTexture2(), chessQueenBlack.getVBONIndex());
+		
+		
+		// renderer.renderWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBONIndex());
 		// renderer.setGoldMaterial();
 		// renderer.setupLights(elapsedTimeOffset);	
 		// mMat.identity();
@@ -511,6 +545,35 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 	}
 
+	private void updateChessQueenBlack() {
+		chessQueenBlack.update(elapsedTimeOffset);
+		currObjLoc = chessQueenBlack.getLocation();
+
+		x = currObjLoc.x();
+		y = currObjLoc.y();
+		z = currObjLoc.z();
+		
+		chessQueenBlack.setLocation(x, y, z);
+		
+		mMat.translation(x+10.0f, y, z);
+		mMat.scale(3.0f, 3.0f, 3.0f);
+		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
+	}
+
+	private void updateChessQueenWhite() {
+		chessQueenWhite.update(elapsedTimeOffset);
+		currObjLoc = chessQueenWhite.getLocation();
+
+		x = currObjLoc.x();
+		y = currObjLoc.y();
+		z = currObjLoc.z();
+		
+		chessQueenWhite.setLocation(x, y, z);
+		
+		mMat.translation(x-14.0f, y, z);
+		mMat.scale(3.0f, 3.0f, 3.0f);
+		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
+	}
 	// private void updateChessQueen() {
 	// 	chessQueen1.update(elapsedTimeOffset);
 	// 	currObjLoc = chessQueen1.getLocation();

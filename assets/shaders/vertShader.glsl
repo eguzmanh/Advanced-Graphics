@@ -54,7 +54,7 @@ void main(void)
 	varyingNormal = (norm_matrix * vec4(vertNormal,1.0)).xyz;
 	
 	//if rendering a back-face, flip the normal
-	//if (flipNormal < 0) varyingNormal = -varyingNormal;
+	if (flipNormal < 0) varyingNormal = -varyingNormal;
 
 	varyingHalfVector = normalize(normalize(varyingLightDir) + normalize(-varyingVertPos)).xyz;
 

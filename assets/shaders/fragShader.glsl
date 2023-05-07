@@ -109,6 +109,7 @@ void main(void) {
 		}
 		//fragColor = lcolor;
 		fragColor = mix(fogColor,(lcolor),fogFactor);
+		fragColor = vec4(fragColor.xyz, alpha);
 	} 
 	else if (textureStatus == 1) { 
 		ambient = ((globalAmbient) + (light.ambient)).xyz;
@@ -122,6 +123,7 @@ void main(void) {
 
 		tcolor = texture(samp, tc);
 		fragColor = mix(fogColor,(tcolor * lcolor),fogFactor);
+		fragColor = vec4(fragColor.xyz, alpha);
 		//fragColor = tcolor * lcolor;
 		//fragColor = vec4(fragColor.xyz, alpha);
 		//fragColor = mix(fogColor, fragColor, fogFactor);
@@ -147,5 +149,6 @@ void main(void) {
 
 		tcolor = texture(samp3D, originalPosition/3.0 + 0.5);
 		fragColor = mix(fogColor,(tcolor * lcolor),fogFactor);
+		fragColor = vec4(fragColor.xyz, alpha);
 	}
 }

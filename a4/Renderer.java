@@ -473,7 +473,54 @@ public class Renderer {
         gl.glPointSize(50.0f);
         gl.glDrawArrays(GL_POINTS, 0, 1);
     }
+
     
+    public void renderAlphaTexturedMaterialObject(int vboObjId,int numVertices, int vboTxId, int texture, int vboNId){
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        gl.glUniform1i(glTextureStatus, 2);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
+		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(0);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboTxId]);
+		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+        
+        
+        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboNId]);
+		gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+        
+		gl.glActiveTexture(GL_TEXTURE2);
+		gl.glBindTexture(GL_TEXTURE_3D, texture);
+
+        gl.glEnable(GL_BLEND);
+		gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		gl.glBlendEquation(GL_FUNC_ADD);
+
+		gl.glEnable(GL_CULL_FACE);
+		
+		gl.glCullFace(GL_FRONT);
+        gl.glUniform1f(alphaLoc, 0.3f);
+        gl.glUniform1f(flipLoc, -1.0f);
+		// gl.glProgramUniform1f(renderingProgram, alphaLoc, 0.3f);
+		// gl.glProgramUniform1f(renderingProgram, flipLoc, -1.0f);
+		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
+		
+		gl.glCullFace(GL_BACK);
+        gl.glUniform1f(alphaLoc, 0.5f);
+        gl.glUniform1f(flipLoc, 1.0f);
+		// gl.glProgramUniform1f(renderingProgram, alphaLoc, 0.7f);
+		// gl.glProgramUniform1f(renderingProgram, flipLoc, 1.0f);
+		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
+
+		gl.glDisable(GL_BLEND);
+    }
+
+    // public void renderAlphaTexturedMaterialObject() {}
+
     /** Bind objects with a texture */
     public void renderTexturedMaterialWorldObject(int vboObjId,int numVertices, int vboTxId, int texture, int vboNId) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
