@@ -15,13 +15,17 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 import static com.jogamp.opengl.GL4.*;
 
+
+/**
+ * Water will be supported in the renderer because it's 
+ */
 public class Renderer {
     private HashMap<String, Integer> shaders;
 
 	public int vao[];
 	public int vbo[];
     private int currVboIndex;
-    private int mLoc, vLoc, pLoc, nLoc, sLoc, alphaLoc, flipLoc;; 
+    private int mLoc, vLoc, pLoc, nLoc, sLoc, alphaLoc, flipLoc, aboveLoc;
 
     private int lightLoc, globalAmbLoc, ambLoc, diffLoc, specLoc, posLoc, mambLoc, mdiffLoc, mspecLoc, mshiLoc;
 
@@ -68,6 +72,26 @@ public class Renderer {
 	private int [] shadowTex = new int[1];
 	private int [] shadowBuffer = new int[1];
 
+    private int marbleNoiseTexture1, marbleNoiseTexture2, waterNoiseTexture;
+	private int noiseWidth = 256;
+	private int noiseHeight= 256;
+	private int noiseDepth = 256;
+	private double[][][] noise = new double[noiseWidth][noiseHeight][noiseDepth];
+    private double[][][] waterNoise = new double[noiseWidth][noiseHeight][noiseDepth];
+	private java.util.Random random = new java.util.Random();
+
+    private int[] bufferId = new int[1];
+	private int refractTextureId;
+	private int reflectTextureId;
+	private int refractFrameBuffer;
+	private int reflectFrameBuffer;
+
+    private float surfacePlaneHeight = 0.0f;
+	private float floorPlaneHeight = -10.0f;
+
+    private Color c;
+
+
     public Renderer() {
         vao = new int[3];
         vbo = new int[25];  
@@ -87,31 +111,61 @@ public class Renderer {
         setDefaultMaterial();
     }
 
+    public void initWaterObjData() {
+		GL4 gl = (GL4) GLContext.getCurrentGL();
 
-    private int noiseTexture1, noiseTexture2;
-	private int noiseWidth = 256;
-	private int noiseHeight= 256;
-	private int noiseDepth = 256;
-	private double[][][] noise = new double[noiseWidth][noiseHeight][noiseDepth];
-	private java.util.Random random = new java.util.Random();
-
-    private Color c;
-
+		float[] cubeVertexPositions =
+		{ -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f, 1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f, 1.0f, -1.0f,  1.0f, 1.0f,  1.0f, -1.0f,
+			1.0f, -1.0f,  1.0f, 1.0f,  1.0f,  1.0f, 1.0f,  1.0f, -1.0f,
+			1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f, 1.0f,  1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, 1.0f,  1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f,
+			-1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,
+			-1.0f,  1.0f, -1.0f, 1.0f,  1.0f, -1.0f, 1.0f,  1.0f,  1.0f,
+			1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f
+		};
+        bindVBO();
+		float[] PLANE_POSITIONS = {
+			-120.0f, 0.0f, -240.0f,  -120.0f, 0.0f, 0.0f,  120.0f, 0.0f, -240.0f,
+			120.0f, 0.0f, -240.0f,  -120.0f, 0.0f, 0.0f,  120.0f, 0.0f, 0.0f
+		};
+		float[] PLANE_TEXCOORDS = {
+			0.0f, 0.0f,  0.0f, 1.0f,  1.0f, 0.0f,
+			1.0f, 0.0f,  0.0f, 1.0f,  1.0f, 1.0f
+		};
+		float[] PLANE_NORMALS = {
+			0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f
+		};
+    }
 
     public void init3DMarbleTexture() {
         generateNoise();	
-		noiseTexture1 = buildNoiseTexture1();
-        noiseTexture2 = buildNoiseTexture2();
+		marbleNoiseTexture1 = buildMarbleNoiseTexture1();
+        marbleNoiseTexture2 = buildMarbleNoiseTexture2();
     }
 
     public int get3DMarbleTexture1() {
-        return noiseTexture1;
+        return marbleNoiseTexture1;
     }
     public int get3DMarbleTexture2() {
-        return noiseTexture2;
+        return marbleNoiseTexture2;
     }
 
-	private void fillDataArray(byte data[])
+    public void initWaterTexture() {
+        createReflectRefractBuffers();	
+		waterNoiseTexture = builWaterNoiseTexture();
+    }
+
+    public int getWaterTexture() {
+        return waterNoiseTexture;
+    }
+
+	private void fillMarbleDataArray(byte data[])
 	{ double veinFrequency = 20.0;
 	  double turbPower = 0.0;
 	  double maxZoom =  64.0;
@@ -119,7 +173,7 @@ public class Renderer {
 	  { for (int j=0; j<noiseHeight; j++)
 	    { for (int k=0; k<noiseDepth; k++)
 	      {	double xyzValue = (float)i/noiseWidth + (float)j/noiseHeight + (float)k/noiseDepth
-							+ turbPower * turbulence(i,j,k,maxZoom)/256.0;
+							+ turbPower * marbleTurbulence(i,j,k,maxZoom)/256.0;
 
 		double sineValue = logistic(Math.abs(Math.sin(xyzValue * 3.14159 * veinFrequency)));
 		sineValue = Math.max(-1.0, Math.min(sineValue*1.25-0.20, 1.0));
@@ -134,7 +188,7 @@ public class Renderer {
 	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+3] = (byte) 255;
         } } } }
         
-        private void fillDataArray2(byte data[])
+        private void fillMarbleDataArray2(byte data[])
         { double veinFrequency = 20.0;
             double turbPower = 0.0;
 	  double maxZoom =  64.0;
@@ -142,7 +196,7 @@ public class Renderer {
 	  { for (int j=0; j<noiseHeight; j++)
 	    { for (int k=0; k<noiseDepth; k++)
             {	double xyzValue = (float)i/noiseWidth + (float)j/noiseHeight + (float)k/noiseDepth
-                + turbPower * turbulence(i,j,k,maxZoom)/256.0;
+                + turbPower * marbleTurbulence(i,j,k,maxZoom)/256.0;
                 
                 double sineValue = logistic(Math.abs(Math.sin(xyzValue * 3.14159 * veinFrequency)));
 		sineValue = Math.max(-1.0, Math.min(sineValue*1.25-0.20, 1.0));
@@ -162,12 +216,12 @@ public class Renderer {
 	        data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+3] = (byte) 255;
 	} } } }
 	
-	private int buildNoiseTexture1()
+	private int buildMarbleNoiseTexture1()
 	{	GL4 gl = (GL4) GLContext.getCurrentGL();
 
 		byte[] data = new byte[noiseWidth*noiseHeight*noiseDepth*4];
 		
-		fillDataArray(data);
+		fillMarbleDataArray(data);
 
 		ByteBuffer bb = Buffers.newDirectByteBuffer(data);
 
@@ -186,12 +240,12 @@ public class Renderer {
 		return textureID;
 	}
 
-    private int buildNoiseTexture2()
+    private int buildMarbleNoiseTexture2()
 	{	GL4 gl = (GL4) GLContext.getCurrentGL();
 
 		byte[] data = new byte[noiseWidth*noiseHeight*noiseDepth*4];
 		
-		fillDataArray2(data);
+		fillMarbleDataArray2(data);
 
 		ByteBuffer bb = Buffers.newDirectByteBuffer(data);
 
@@ -243,7 +297,128 @@ public class Renderer {
 		return value;
 	}
 
-	private double turbulence(double x, double y, double z, double maxZoom)
+    private double waterSmooth(double zoom, double x1, double y1, double z1)
+	{	//get fractional part of x, y, and z
+		double fractX = x1 - (int) x1;
+		double fractY = y1 - (int) y1;
+		double fractZ = z1 - (int) z1;
+
+		//neighbor values that wrap
+		double x2 = x1 - 1; if (x2<0) x2 = (Math.round(noiseWidth / zoom)) - 1;
+		double y2 = y1 - 1; if (y2<0) y2 = (Math.round(noiseHeight / zoom)) - 1;
+		double z2 = z1 - 1; if (z2<0) z2 = (Math.round(noiseDepth / zoom)) - 1;
+
+		//smooth the noise by interpolating
+		double value = 0.0;
+		value += fractX       * fractY       * fractZ       * noise[(int)x1][(int)y1][(int)z1];
+		value += (1.0-fractX) * fractY       * fractZ       * noise[(int)x2][(int)y1][(int)z1];
+		value += fractX       * (1.0-fractY) * fractZ       * noise[(int)x1][(int)y2][(int)z1];	
+		value += (1.0-fractX) * (1.0-fractY) * fractZ       * noise[(int)x2][(int)y2][(int)z1];
+				
+		value += fractX       * fractY       * (1.0-fractZ) * noise[(int)x1][(int)y1][(int)z2];
+		value += (1.0-fractX) * fractY       * (1.0-fractZ) * noise[(int)x2][(int)y1][(int)z2];
+		value += fractX       * (1.0-fractY) * (1.0-fractZ) * noise[(int)x1][(int)y2][(int)z2];
+		value += (1.0-fractX) * (1.0-fractY) * (1.0-fractZ) * noise[(int)x2][(int)y2][(int)z2];
+		
+		return value;
+	}
+
+	private double waterTurbulence(double x, double y, double z, double maxZoom)
+	{	double sum = 0.0, zoom = maxZoom;
+	
+		sum = (Math.sin((1.0/512.0)*(8*PI)*(x+z)) + 1) * 8.0;
+		while(zoom >= 0.9)
+		{	sum = sum + waterSmooth(zoom, x/zoom, y/zoom, z/zoom) * zoom;
+			zoom = zoom / 2.0;
+		}
+		sum = 128.0 * sum/maxZoom;
+		return sum;
+	}
+
+	private void fillWaterDataArray(byte data[])
+	{	double maxZoom = 32.0;
+		for (int i=0; i<noiseWidth; i++)
+		{	for (int j=0; j<noiseHeight; j++)
+			{	for (int k=0; k<noiseDepth; k++)
+				{	noise[i][j][k] = random.nextDouble();
+		}	}	}
+		for (int i = 0; i<noiseHeight; i++)
+		{	for (int j = 0; j<noiseWidth; j++)
+			{	for (int k = 0; k<noiseDepth; k++)
+				{	data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+0] = (byte)waterTurbulence(i,j,k,maxZoom);
+					data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+1] = (byte)waterTurbulence(i,j,k,maxZoom);
+					data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+2] = (byte)waterTurbulence(i,j,k,maxZoom);
+					data[i*(noiseWidth*noiseHeight*4)+j*(noiseHeight*4)+k*4+3] = (byte)255;
+	}	}	}	}
+
+	private int builWaterNoiseTexture()
+	{	GL4 gl = (GL4) GLContext.getCurrentGL();
+
+		byte[] data = new byte[noiseWidth*noiseHeight*noiseDepth*4];
+		
+		fillWaterDataArray(data);
+
+		ByteBuffer bb = Buffers.newDirectByteBuffer(data);
+
+		int[] textureIDs = new int[1];
+		gl.glGenTextures(1, textureIDs, 0);
+		int textureID = textureIDs[0];
+
+		gl.glBindTexture(GL_TEXTURE_3D, textureID);
+
+		gl.glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA8, noiseWidth, noiseHeight, noiseDepth);
+		gl.glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0,
+				noiseWidth, noiseHeight, noiseDepth, GL_RGBA, GL_UNSIGNED_BYTE, bb);
+	
+		gl.glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		gl.glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		return textureID;
+	}
+
+	private void createReflectRefractBuffers()
+	{	GL4 gl = (GL4) GLContext.getCurrentGL();
+	
+		// Initialize Reflect Framebuffer
+		gl.glGenFramebuffers(1, bufferId, 0);
+		reflectFrameBuffer = bufferId[0];
+		gl.glBindFramebuffer(GL_FRAMEBUFFER, reflectFrameBuffer);
+		gl.glGenTextures(1, bufferId, 0);
+		reflectTextureId = bufferId[0];
+		gl.glBindTexture(GL_TEXTURE_2D, reflectTextureId);
+		gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, myCanvas.getWidth(), myCanvas.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		gl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectTextureId, 0);
+		gl.glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		gl.glGenTextures(1, bufferId, 0);
+		gl.glBindTexture(GL_TEXTURE_2D, bufferId[0]);
+		gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, myCanvas.getWidth(), myCanvas.getHeight(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, null);
+		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		gl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferId[0], 0);
+
+		// Initialize Refract Framebuffer
+		gl.glGenFramebuffers(1, bufferId, 0);
+		refractFrameBuffer = bufferId[0];
+		gl.glBindFramebuffer(GL_FRAMEBUFFER, refractFrameBuffer);
+		gl.glGenTextures(1, bufferId, 0);
+		refractTextureId = bufferId[0];
+		gl.glBindTexture(GL_TEXTURE_2D, refractTextureId);
+		gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, myCanvas.getWidth(), myCanvas.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		gl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractTextureId, 0);
+		gl.glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		gl.glGenTextures(1, bufferId, 0);
+		gl.glBindTexture(GL_TEXTURE_2D, bufferId[0]);
+		gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, myCanvas.getWidth(), myCanvas.getHeight(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, null);
+		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		gl.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferId[0], 0);
+	}
+
+	private double marbleTurbulence(double x, double y, double z, double maxZoom)
 	{	double sum = 0.0, zoom = maxZoom;
 		while(zoom >= 0.9)
 		{	sum = sum + smoothNoise(zoom, x/zoom, y/zoom, z/zoom) * zoom;
@@ -327,6 +502,9 @@ public class Renderer {
         shaders.put("axisLineShader", Utils.createShaderProgram("assets/shaders/lineVertShader.glsl", "assets/shaders/lineFragShader.glsl"));
         shaders.put("cubeMapShader", Utils.createShaderProgram("assets/shaders/cubeMapVertShader.glsl", "assets/shaders/cubeMapFragShader.glsl"));
         shaders.put("lightDotShader", Utils.createShaderProgram("assets/shaders/lightDotVertShader.glsl", "assets/shaders/lightDotFragShader.glsl"));
+        shaders.put("waterShader", Utils.createShaderProgram("assets/shaders/waterVertShader.glsl", "assets/shaders/waterFragShader.glsl"));
+        shaders.put("waterSurfaceShader", Utils.createShaderProgram("assets/shaders/waterSurfaceVertShader.glsl", "assets/shaders/waterSurfaceFragShader.glsl"));
+        shaders.put("waterFloorShader", Utils.createShaderProgram("assets/shaders/waterFloorVertShader.glsl", "assets/shaders/waterFloorFragShader.glsl"));
     }
 
     private void setUpVertexArrayObjects() {
@@ -393,6 +571,31 @@ public class Renderer {
         lightStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "lightStatus");
 
         
+    }
+
+
+    public void useWaterSurfaceShader() {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+		gl.glUseProgram(shaders.get("waterSurfaceShader"));
+
+		mLoc = gl.glGetUniformLocation(shaders.get("waterSurfaceShader"), "m_matrix");
+		vLoc = gl.glGetUniformLocation(shaders.get("waterSurfaceShader"), "v_matrix");
+		pLoc = gl.glGetUniformLocation(shaders.get("waterSurfaceShader"), "p_matrix");
+		nLoc = gl.glGetUniformLocation(shaders.get("waterSurfaceShader"), "norm_matrix");
+		aboveLoc = gl.glGetUniformLocation(shaders.get("waterSurfaceShader"), "isAbove");
+    }
+
+    public void useWaterFloorShader() {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+		gl.glUseProgram(shaders.get("waterFloorShader"));
+
+		mLoc = gl.glGetUniformLocation(shaders.get("waterFloorShader"), "m_matrix");
+		vLoc = gl.glGetUniformLocation(shaders.get("waterFloorShader"), "v_matrix");
+		pLoc = gl.glGetUniformLocation(shaders.get("waterFloorShader"), "p_matrix");
+		nLoc = gl.glGetUniformLocation(shaders.get("waterFloorShader"), "norm_matrix");
+		aboveLoc = gl.glGetUniformLocation(shaders.get("waterFloorShader"), "isAbove");
     }
 
     public void useCubeMapShader() { 
@@ -822,5 +1025,97 @@ public class Renderer {
 		gl.glProgramUniform4fv(shaders.get("mainShader"), mdiffLoc, 1, matDif, 0);
 		gl.glProgramUniform4fv(shaders.get("mainShader"), mspecLoc, 1, matSpe, 0);
 		gl.glProgramUniform1f(shaders.get("mainShader"), mshiLoc, matShi);
+	}
+
+    private void prepForTopSurfaceRender()
+	{	GL4 gl = (GL4) GLContext.getCurrentGL();
+
+		gl.glUseProgram(renderingProgramSURFACE);
+
+		mLoc = gl.glGetUniformLocation(renderingProgramSURFACE, "m_matrix");
+		vLoc = gl.glGetUniformLocation(renderingProgramSURFACE, "v_matrix");
+		pLoc = gl.glGetUniformLocation(renderingProgramSURFACE, "p_matrix");
+		nLoc = gl.glGetUniformLocation(renderingProgramSURFACE, "norm_matrix");
+		aboveLoc = gl.glGetUniformLocation(renderingProgramSURFACE, "isAbove");
+
+		mMat.translation(0.0f, surfacePlaneHeight, 0.0f);
+
+		mMat.invert(invTrMat);
+		invTrMat.transpose(invTrMat);
+
+		currentLightPos.set(initialLightLoc);
+		installLights(renderingProgramSURFACE);
+
+		gl.glUniformMatrix4fv(mLoc, 1, false, mMat.get(vals));
+		gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals));
+		gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals));
+		gl.glUniformMatrix4fv(nLoc, 1, false, invTrMat.get(vals));
+
+		if (cameraHeight >= surfacePlaneHeight)
+			gl.glUniform1i(aboveLoc, 1);
+		else
+			gl.glUniform1i(aboveLoc, 0);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(0);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+		gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(2);
+		
+		gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_2D, reflectTextureId);
+		gl.glActiveTexture(GL_TEXTURE1);
+		gl.glBindTexture(GL_TEXTURE_2D, refractTextureId);
+		gl.glActiveTexture(GL_TEXTURE2);
+		gl.glBindTexture(GL_TEXTURE_3D, noiseTexture);
+	}
+
+	private void prepForFloorRender()
+	{	GL4 gl = (GL4) GLContext.getCurrentGL();
+
+		gl.glUseProgram(renderingProgramFLOOR);
+
+		mLoc = gl.glGetUniformLocation(shaders.get("waterFloorShader"), "m_matrix");
+		vLoc = gl.glGetUniformLocation(shaders.get("waterFloorShader"), "v_matrix");
+		pLoc = gl.glGetUniformLocation(shaders.get("waterFloorShader"), "p_matrix");
+		nLoc = gl.glGetUniformLocation(shaders.get("waterFloorShader"), "norm_matrix");
+		aboveLoc = gl.glGetUniformLocation(shaders.get("waterFloorShader"), "isAbove");
+		
+		mMat.translation(0.0f, floorPlaneHeight, 0.0f);
+
+		mMat.invert(invTrMat);
+		invTrMat.transpose(invTrMat);
+
+		currentLightPos.set(initialLightLoc);
+		installLights(renderingProgramFLOOR);
+
+		gl.glUniformMatrix4fv(mLoc, 1, false, mMat.get(vals));
+		gl.glUniformMatrix4fv(vLoc, 1, false, vMat.get(vals));
+		gl.glUniformMatrix4fv(pLoc, 1, false, pMat.get(vals));
+		gl.glUniformMatrix4fv(nLoc, 1, false, invTrMat.get(vals));
+
+		if (cameraHeight >= surfacePlaneHeight)
+			gl.glUniform1i(aboveLoc, 1);
+		else
+			gl.glUniform1i(aboveLoc, 0);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[currVboIndex++]);
+		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(0);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[currVboIndex++]);
+		gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[currVboIndex++]);
+		gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(2);
+		
+		gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_3D, waterNoiseTexture);
 	}
 }
