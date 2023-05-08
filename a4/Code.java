@@ -453,7 +453,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		mMat.identity();
 		updateChessKingBlack();
 		pass2CommonActions();
-		renderer.renderAlphaTexturedMaterialObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBOTxIndex(), renderer.get3DMarbleTexture2(), chessKingBlack.getVBONIndex());
+		renderer.renderTexturedMaterialWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBOTxIndex(), renderer.get3DMarbleTexture2(), chessKingBlack.getVBONIndex());
 		
 		renderer.setGoldMaterial();
 		renderer.setupLights(elapsedTimeOffset);	

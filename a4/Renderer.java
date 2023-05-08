@@ -378,6 +378,11 @@ public class Renderer {
         sLoc = gl.glGetUniformLocation(shaders.get("mainShadowShader"), "shadowMVP");
     }
 
+
+
+    /**
+     * THis method will init the main shader program uniform data of rendering the scene
+     */
     public void useMainShader() { 
         GL4 gl = (GL4) GLContext.getCurrentGL();
         gl.glUseProgram(shaders.get("mainShader"));
@@ -395,6 +400,9 @@ public class Renderer {
         
     }
 
+    /**
+     * THis method will init the cubemap shader program ofrendering the scene
+     */
     public void useCubeMapShader() { 
         GL4 gl = (GL4) GLContext.getCurrentGL();
         gl.glUseProgram(shaders.get("cubeMapShader"));
@@ -402,6 +410,10 @@ public class Renderer {
 		pLoc = gl.glGetUniformLocation(shaders.get("cubeMapShader"), "p_matrix");
     }
 
+
+    /**
+     * THis method will init the line dot shader program of rendering the scene
+     */
     public void useLineShader() {
         GL4 gl = (GL4) GLContext.getCurrentGL();
 
