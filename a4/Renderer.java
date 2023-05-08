@@ -718,9 +718,22 @@ public class Renderer {
 
     public void clearGL() {
         GL4 gl = (GL4) GLContext.getCurrentGL();
-        gl.glClear(GL_COLOR_BUFFER_BIT);
-		gl.glClearColor(0.7f, 0.8f, 0.9f, 1.0f);
-		gl.glClear(GL_DEPTH_BUFFER_BIT);
+
+        gl.glColorMask(true, true, true, true);
+		gl.glClear(GL_DEPTH_BUFFER_BIT);	
+		gl.glClearColor(0.7f, 0.8f, 0.9f, 1.0f); // background fog color is bluish-grey
+		gl.glClear(GL_COLOR_BUFFER_BIT);
+    }
+
+    public void anaglyphLeftColorMask() {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+        gl.glColorMask(true, false, false, false);
+    }
+
+    public void anaglyphRightColorMask() {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+        gl.glClear(GL_DEPTH_BUFFER_BIT);
+		gl.glColorMask(false, true, true, false);
     }
 
     public int getCurrVBOIndex() { return currVboIndex; }
@@ -823,4 +836,6 @@ public class Renderer {
 		gl.glProgramUniform4fv(shaders.get("mainShader"), mspecLoc, 1, matSpe, 0);
 		gl.glProgramUniform1f(shaders.get("mainShader"), mshiLoc, matShi);
 	}
+
+   
 }

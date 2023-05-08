@@ -101,6 +101,12 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	private int lastX, lastY, lastVarsSet = 0;
 
 
+	// VR stuff
+	private float IOD = 0.5f;  // tunable interocular distance � we arrived at 0.01 for this scene by trial-and-error
+	private float near = 0.01f;
+	private float far = 100.0f;
+	private int sizeX = 1920, sizeY = 1080;
+
 	// **************** Constructor(s) ****************************
 	public Code() {	
 		numObjects = 13;
@@ -203,6 +209,15 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		lightPmat.identity().setPerspective((float) Math.toRadians(60.0f), aspect, 0.1f, 1000.0f);
 	}
 
+	private void computePerspectiveMatrix(float leftRight)
+	{	float top = (float)Math.tan(1.0472f / 2.0f) * (float)near;
+		float bottom = -top;
+		float frustumshift = (IOD / 2.0f) * near / far;
+		float left = -aspect * top - frustumshift * leftRight;
+		float right = aspect * top - frustumshift * leftRight;
+		pMat.setFrustum(left, right, bottom, top, near, far);
+	}
+
 	private void loadObjects() {
 		// dolphinObj = new ImportedModel("assets/models/dolphinHighPoly.obj");
 		// waterTankObj = new ImportedModel("assets/models/waterTank.obj");
@@ -291,15 +306,27 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		// renderer.bindWorldObjectWNormals(chessPawn1, chessPawn1.getVertices(), chessPawn1.getNormals());
 	}
 
+	public void display(GLAutoDrawable drawable) {
+		upateElapsedTimeInfo();
+		setPerspective();
+		
+		renderer.clearGL();
+		
+		renderer.anaglyphLeftColorMask();
+		scene(-1.0f);
+		
+		renderer.anaglyphRightColorMask();
+		scene(1.0f);
+	}
 
 	// ************************* Runtime Actions *************************
 	/** Renders on every frame and does actions */
-	public void display(GLAutoDrawable drawable) {
-		renderer.clearGL();
+	public void scene(float leftRight) {
+		// renderer.clearGL();
 		
-		upateElapsedTimeInfo();
-		setPerspective();
-
+		// upateElapsedTimeInfo();
+		// setPerspective();
+		computePerspectiveMatrix(leftRight);
 		// * View Matrix from Camera
 		vMat.set(camera.getViewMatrix());
 
