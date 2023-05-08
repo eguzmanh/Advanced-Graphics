@@ -102,7 +102,9 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 
 	// VR stuff
-	private float IOD = 0.5f;  // tunable interocular distance � we arrived at 0.01 for this scene by trial-and-error
+	// chnange the IOD value to enhance the distance between the red and cyan output of the renderer
+	// 2.5 seeems to work with this program ti render the scene in the red/cyan glasses
+	private float IOD = 2.5f;  // tunable interocular distance � we arrived at 0.01 for this scene by trial-and-error
 	private float near = 0.01f;
 	private float far = 100.0f;
 	private int sizeX = 1920, sizeY = 1080;
@@ -257,8 +259,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		chessKingBlack = new ChessPiece("chessPiece", chessKingObj);
 		chessKingWhite = new ChessPiece("chessPiece", chessKingObj);
 
-		chessQueenBlack = new ChessPiece("chessPiece", chessKingObj);
-		chessQueenWhite = new ChessPiece("chessPiece", chessKingObj);
+		chessQueenBlack = new ChessPiece("chessPiece", chessQueenObj);
+		chessQueenWhite = new ChessPiece("chessPiece", chessQueenObj);
 		
 		chessRookWhite1 = new ChessPiece("chessPiece", chessRookObj);
 		chessRookWhite2 = new ChessPiece("chessPiece", chessRookObj);
@@ -582,7 +584,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		chessQueenBlack.setLocation(x, y, z);
 		
-		mMat.translation(x+10.0f, y, z);
+		mMat.translation(x+16.0f, y, z);
 		mMat.scale(3.0f, 3.0f, 3.0f);
 		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 	}
@@ -597,7 +599,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		chessQueenWhite.setLocation(x, y, z);
 		
-		mMat.translation(x-14.0f, y, z);
+		mMat.translation(x-9.0f, y, z);
 		mMat.scale(3.0f, 3.0f, 3.0f);
 		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 	}
