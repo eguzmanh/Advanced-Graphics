@@ -22,7 +22,7 @@ public abstract class WorldObject extends ModelObject {
     private boolean enabled;
     private Vector3f location;
 
-    private int vboIndex, vboTxIndex, vboNIndex;
+    private int vboIndex, vboTxIndex, vboNIndex, vboIdxIndex;
 
     private float rotationAngle;
 
@@ -44,6 +44,7 @@ public abstract class WorldObject extends ModelObject {
     public int getVBOIndex() { return vboIndex; }
     public int getVBOTxIndex() { return vboTxIndex; }
     public int getVBONIndex() { return vboNIndex; }
+    public int getVBONIdxIndex() { return vboIdxIndex; }
 
     public float getRotationAngle() { return rotationAngle; }
 
@@ -62,6 +63,8 @@ public abstract class WorldObject extends ModelObject {
     public void setVBOTxIndex(int vboi) { vboTxIndex = vboi; }
 
     public void setVBONIndex(int vboi) { vboNIndex = vboi; }
+
+    public void setVBOIdxIndex(int vboi) { vboIdxIndex = vboi; }
 
     public void setRotationAngle(float offset) { rotationAngle += offset % 360; };
 

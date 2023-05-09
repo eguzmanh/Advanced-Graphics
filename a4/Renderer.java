@@ -293,6 +293,15 @@ public class Renderer {
         setUpVertexBufferObjects();
     }
 
+    public void bindIndexedWorldObject(WorldObject wo, float[] vertices, float[] normals, int[] indices){
+        wo.setVBOIndex(currVboIndex);
+        bindVBO(vertices);
+        wo.setVBONIndex(currVboIndex);
+        bindVBO(normals);
+        wo.setVBOIdxIndex(currVboIndex);
+        bindIndicesVBO(indices);
+    }
+
     public void bindTexturedWorldObject(WorldObject wo, float[] vertices, float[] txCoords, float[] normals) {
         wo.setVBOIndex(currVboIndex);
         bindVBO(vertices);
@@ -324,6 +333,7 @@ public class Renderer {
     private void createRenderingPrograms() {
         shaders.put("mainShader", Utils.createShaderProgram("assets/shaders/vertShader.glsl", "assets/shaders/fragShader.glsl"));
         shaders.put("mainShadowShader", Utils.createShaderProgram("assets/shaders/vertShadowShader.glsl", "assets/shaders/fragShadowShader.glsl"));
+        shaders.put("sphereGeomShader", Utils.createShaderProgram("assets/shaders/sphere/sphereVertShader.glsl", "assets/shaders/sphere/sphereGeomShader.glsl", "assets/shaders/sphere/sphereFragShader.glsl"));
         shaders.put("axisLineShader", Utils.createShaderProgram("assets/shaders/lineVertShader.glsl", "assets/shaders/lineFragShader.glsl"));
         shaders.put("cubeMapShader", Utils.createShaderProgram("assets/shaders/cubeMapVertShader.glsl", "assets/shaders/cubeMapFragShader.glsl"));
         shaders.put("lightDotShader", Utils.createShaderProgram("assets/shaders/lightDotVertShader.glsl", "assets/shaders/lightDotFragShader.glsl"));
@@ -346,6 +356,16 @@ public class Renderer {
         gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[currVboIndex++]);
 		FloatBuffer buf = Buffers.newDirectFloatBuffer(points);
 		gl.glBufferData(GL_ARRAY_BUFFER, buf.limit()*4, buf, GL_STATIC_DRAW);
+        // currVboIndex += 1;
+        // System.out.println("currVboIndex: " + currVboIndex);
+    }
+
+    private void bindIndicesVBO(int[] indices) {
+        // System.out.println("currVboIndex: " + currVboIndex);
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[currVboIndex++]);
+		IntBuffer buf = Buffers.newDirectIntBuffer(indices);
+		gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf.limit()*4, buf, GL_STATIC_DRAW);
         // currVboIndex += 1;
         // System.out.println("currVboIndex: " + currVboIndex);
     }
@@ -398,6 +418,15 @@ public class Renderer {
         lightStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "lightStatus");
 
         
+    }
+
+    public void useGeomSphereShader() {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+        gl.glUseProgram(shaders.get("sphereGeomShader"));
+        mLoc = gl.glGetUniformLocation(shaders.get("sphereGeomShader"), "m_matrix");
+		vLoc = gl.glGetUniformLocation(shaders.get("sphereGeomShader"), "v_matrix");
+		pLoc = gl.glGetUniformLocation(shaders.get("sphereGeomShader"), "p_matrix");
+		nLoc = gl.glGetUniformLocation(shaders.get("sphereGeomShader"), "norm_matrix");
     }
 
     /**
@@ -486,6 +515,42 @@ public class Renderer {
         gl.glDrawArrays(GL_POINTS, 0, 1);
     }
 
+
+    public void renderSphereGeomObject(int vboObjId, int numVertices, int vboNId) {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+        
+        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
+		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(0);
+
+        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboNId]);
+		gl.glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+
+
+		gl.glEnable(GL_CULL_FACE);
+		gl.glFrontFace(GL_CCW);
+		gl.glEnable(GL_DEPTH_TEST);
+		gl.glDepthFunc(GL_LEQUAL);
+
+		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
+
+        // gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
+		// gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		// gl.glEnableVertexAttribArray(0);
+
+		// gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboNId]);
+		// gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
+		// gl.glEnableVertexAttribArray(1);
+
+		// gl.glEnable(GL_CULL_FACE);
+		// gl.glFrontFace(GL_CCW);
+		// gl.glEnable(GL_DEPTH_TEST);
+		// gl.glDepthFunc(GL_LEQUAL);
+
+		// gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[vboIdxId]);
+		// gl.glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+    }
     
     public void renderAlphaTexturedMaterialObject(int vboObjId,int numVertices, int vboTxId, int texture, int vboNId){
         GL4 gl = (GL4) GLContext.getCurrentGL();
@@ -753,10 +818,6 @@ public class Renderer {
     // // private dir created for a direction change
     // private int dir = 1;
     public void setupLights(float elapsedSpeed) {
-        // amt = elapsedSpeed;
-        // System.out.prin
-
-        // currentLightPos.set(currentLightPos);
         installLights();
     }
 
@@ -821,6 +882,34 @@ public class Renderer {
 
     // }
     // always set the materials, even if it is a very dim white for textured objs
+    public void installLightsTo(String renderingProgram) {	
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+		
+		lightPos[0]=currentLightPos.x; lightPos[1]=currentLightPos.y; lightPos[2]=currentLightPos.z;
+		
+		// get the locations of the light and material fields in the shader
+		globalAmbLoc = gl.glGetUniformLocation(shaders.get(renderingProgram), "globalAmbient");
+		ambLoc = gl.glGetUniformLocation(shaders.get(renderingProgram), "light.ambient");
+		diffLoc = gl.glGetUniformLocation(shaders.get(renderingProgram), "light.diffuse");
+		specLoc = gl.glGetUniformLocation(shaders.get(renderingProgram), "light.specular");
+		posLoc = gl.glGetUniformLocation(shaders.get(renderingProgram), "light.position");
+		mambLoc = gl.glGetUniformLocation(shaders.get(renderingProgram), "material.ambient");
+		mdiffLoc = gl.glGetUniformLocation(shaders.get(renderingProgram), "material.diffuse");
+		mspecLoc = gl.glGetUniformLocation(shaders.get(renderingProgram), "material.specular");
+		mshiLoc = gl.glGetUniformLocation(shaders.get(renderingProgram), "material.shininess");
+	
+		//  set the uniform light and material values in the shader
+		gl.glProgramUniform4fv(shaders.get(renderingProgram), globalAmbLoc, 1, globalAmbient, 0);
+		gl.glProgramUniform4fv(shaders.get(renderingProgram), ambLoc, 1, lightAmbient, 0);
+		gl.glProgramUniform4fv(shaders.get(renderingProgram), diffLoc, 1, lightDiffuse, 0);
+		gl.glProgramUniform4fv(shaders.get(renderingProgram), specLoc, 1, lightSpecular, 0);
+		gl.glProgramUniform3fv(shaders.get(renderingProgram), posLoc, 1, lightPos, 0);
+		gl.glProgramUniform4fv(shaders.get(renderingProgram), mambLoc, 1, matAmb, 0);
+		gl.glProgramUniform4fv(shaders.get(renderingProgram), mdiffLoc, 1, matDif, 0);
+		gl.glProgramUniform4fv(shaders.get(renderingProgram), mspecLoc, 1, matSpe, 0);
+		gl.glProgramUniform1f(shaders.get(renderingProgram), mshiLoc, matShi);
+	}
+
     private void installLights() {	
         GL4 gl = (GL4) GLContext.getCurrentGL();
 		
