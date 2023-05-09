@@ -100,6 +100,14 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 	private int lastX, lastY, lastVarsSet = 0;
 
+	private int squareMoonTexture;
+	private int squareMoonHeight;
+	private int squareMoonNormalMap;
+
+	private boolean showTessMap, showAnaglyphs, showEnvMapping;
+
+
+
 
 	// VR stuff
 	// chnange the IOD value to enhance the distance between the red and cyan output of the renderer
@@ -114,6 +122,9 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		numObjects = 13;
 		displayAxisLines = true;
 		renderer = new Renderer();
+		showTessMap = true;
+		showAnaglyphs = true;
+		showEnvMapping = true;
 
 		initTimeFrames();
 		styleJFrame();
@@ -246,6 +257,11 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		// waterTankTexture = Utils.loadTexture("assets/textures/water-tank/colour.png");
 		chessBoardTexture = Utils.loadTexture("assets/textures/chess/WoodenChessBoard_diffuse.jpg");
 		renderer.init3DMarbleTexture();
+
+	
+		squareMoonTexture = Utils.loadTexture("assets/textures/moonMap/squareMoonMap.jpg");
+		squareMoonHeight = Utils.loadTexture("assets/textures/moonMap/squareMoonBump.jpg");
+		squareMoonNormalMap = Utils.loadTexture("assets/textures/moonMap/squareMoonNormal.jpg");
 	}
 
 	private void buildWorldObjects() {	
@@ -328,7 +344,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		// upateElapsedTimeInfo();
 		// setPerspective();
-		computePerspectiveMatrix(leftRight);
+		if(showAnaglyphs) { computePerspectiveMatrix(leftRight); }
+
 		// * View Matrix from Camera
 		vMat.set(camera.getViewMatrix());
 
@@ -339,11 +356,17 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		renderer.useLineShader();
 		renderAxisLines();
+		
 
 		renderer.useLightDotShader();
 		renderLightDot();
 
+		if (showTessMap) {
+			renderer.useTessShader();
+			renderMoonMap();
+		}
 		
+
 		renderer.prepPass1GLData();
 		renderer.useMainShadowShader();
 		// passOne();
@@ -372,6 +395,23 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	private void renderLightDot() {
 		renderer.renderLightDot(vMat, pMat);
 	}
+
+	private void renderMoonMap() {
+
+		renderer.setGoldMaterial();
+		renderer.installLights("moonMapShader");
+		mMat.identity();
+		mMat.translate(0f, 0f, 0f);
+		mMat.rotateX((float) Math.toRadians(20.0f));
+		mMat.scale(200f);
+		
+		mMat.invert(invTrMat);
+		invTrMat.transpose(invTrMat);
+		// renderer.setupLights(elapsedTimeOffset);
+
+		renderer.setMVPUniformVars(mMat, vMat, pMat, invTrMat);
+		renderer.renderMoonMap(squareMoonTexture, squareMoonHeight, squareMoonNormalMap);
+	}
 	
 
 	// TODO: change the renderer and display so that objects go through both passOne and passTwo 
@@ -394,22 +434,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		pass1CommonActions();
 		renderer.renderWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBONIndex());
 
-		// mMat.identity();
-		// updateChessQueen();
-		// pass1CommonActions();
-		// renderer.renderWorldObject(chessQueen1.getVBOIndex(), chessQueen1.getNumVertices(), chessQueen1.getVBONIndex());
-
-		// mMat.identity();
-		// updateChessBishop();
-		// pass1CommonActions();
-		// renderer.renderWorldObject(chessBishop1.getVBOIndex(), chessBishop1.getNumVertices(), chessBishop1.getVBONIndex());
-
-		// mMat.identity();
-		// updateChessKnight();
-		// pass1CommonActions();
-		// renderer.renderWorldObject(chessKnight1.getVBOIndex(), chessKnight1.getNumVertices(), chessKnight1.getVBONIndex());
-		
-		
 		mMat.identity();
 		updateChessRookWhite1();
 		pass1CommonActions();
@@ -429,11 +453,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		updateChessQueenBlack();
 		pass1CommonActions();
 		renderer.renderWorldObject(chessQueenBlack.getVBOIndex(), chessQueenBlack.getNumVertices(), chessQueenBlack.getVBONIndex());
-
-		// mMat.identity();
-		// updateChessPawn();
-		// pass1CommonActions();
-		// renderer.renderWorldObject(chessPawn1.getVBOIndex(), chessPawn1.getNumVertices(), chessPawn1.getVBONIndex());
 	}
 
 	private void renderWorldObjectsP2() {
@@ -486,15 +505,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		updateChessQueenBlack();
 		pass2CommonActions();
 		renderer.renderAlphaTexturedMaterialObject(chessQueenBlack.getVBOIndex(), chessQueenBlack.getNumVertices(), chessQueenBlack.getVBOTxIndex(), renderer.get3DMarbleTexture2(), chessQueenBlack.getVBONIndex());
-		
-		
-		// renderer.renderWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBONIndex());
-		// renderer.setGoldMaterial();
-		// renderer.setupLights(elapsedTimeOffset);	
-		// mMat.identity();
-		// updateChessPawn();
-		// pass2CommonActions();
-		// renderer.renderWorldObject(chessPawn1.getVBOIndex(), chessPawn1.getNumVertices(), chessPawn1.getVBONIndex());
 	}
 
 	private void pass1CommonActions() {
@@ -725,6 +735,11 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	}
  
 
+	private void toggleShowTessMap() { showTessMap = showTessMap ? false : true; }
+	private void toggleShow3DAnaglyphs() { showAnaglyphs = showAnaglyphs ? false : true; }
+	private void toggleShowEnvMapping() { showEnvMapping = showEnvMapping ? false : true; }
+
+
 	// ************************* Overrides *************************
 	@Override
 	public void dispose(GLAutoDrawable drawable) {}
@@ -740,6 +755,19 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 			case KeyEvent.VK_SPACE:
 				System.out.println("Space key pressed");
 				toggleAxisLinesAction();
+				break;
+
+			case KeyEvent.VK_T:
+				System.out.println("T key pressed");
+				toggleShowTessMap();
+				break;
+			case KeyEvent.VK_Y:
+				System.out.println("O key pressed");
+				toggleShow3DAnaglyphs();
+				break;
+			case KeyEvent.VK_U:
+				System.out.println("O key pressed");
+				toggleShowEnvMapping();
 				break;
 			case KeyEvent.VK_W:
 				System.out.println("W key pressed");

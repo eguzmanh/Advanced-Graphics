@@ -323,6 +323,7 @@ public class Renderer {
 
     private void createRenderingPrograms() {
         shaders.put("mainShader", Utils.createShaderProgram("assets/shaders/vertShader.glsl", "assets/shaders/fragShader.glsl"));
+        shaders.put("moonMapShader", Utils.createShaderProgram("assets/shaders/tessVertShader.glsl", "assets/shaders/tessCShader.glsl", "assets/shaders/tessEShader.glsl", "assets/shaders/tessFragShader.glsl"));
         shaders.put("mainShadowShader", Utils.createShaderProgram("assets/shaders/vertShadowShader.glsl", "assets/shaders/fragShadowShader.glsl"));
         shaders.put("axisLineShader", Utils.createShaderProgram("assets/shaders/lineVertShader.glsl", "assets/shaders/lineFragShader.glsl"));
         shaders.put("cubeMapShader", Utils.createShaderProgram("assets/shaders/cubeMapVertShader.glsl", "assets/shaders/cubeMapFragShader.glsl"));
@@ -378,8 +379,6 @@ public class Renderer {
         sLoc = gl.glGetUniformLocation(shaders.get("mainShadowShader"), "shadowMVP");
     }
 
-
-
     /**
      * THis method will init the main shader program uniform data of rendering the scene
      */
@@ -396,8 +395,16 @@ public class Renderer {
         // include a texture flag in order to use the correct material light properties
         glTextureStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "textureStatus");
         lightStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "lightStatus");
+    }
 
-        
+    public void useTessShader() {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+        gl.glUseProgram(shaders.get("moonMapShader"));
+
+        mLoc = gl.glGetUniformLocation(shaders.get("moonMapShader"), "m_matrix");
+		vLoc = gl.glGetUniformLocation(shaders.get("moonMapShader"), "v_matrix");
+		pLoc = gl.glGetUniformLocation(shaders.get("moonMapShader"), "p_matrix");
+		nLoc = gl.glGetUniformLocation(shaders.get("moonMapShader"), "norm_matrix");
     }
 
     /**
@@ -848,6 +855,60 @@ public class Renderer {
 		gl.glProgramUniform4fv(shaders.get("mainShader"), mspecLoc, 1, matSpe, 0);
 		gl.glProgramUniform1f(shaders.get("mainShader"), mshiLoc, matShi);
 	}
+
+    public void installLights(String rp) {	
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+		
+		lightPos[0]=currentLightPos.x; lightPos[1]=currentLightPos.y; lightPos[2]=currentLightPos.z;
+		
+		// get the locations of the light and material fields in the shader
+		globalAmbLoc = gl.glGetUniformLocation(shaders.get(rp), "globalAmbient");
+		ambLoc = gl.glGetUniformLocation(shaders.get(rp), "light.ambient");
+		diffLoc = gl.glGetUniformLocation(shaders.get(rp), "light.diffuse");
+		specLoc = gl.glGetUniformLocation(shaders.get(rp), "light.specular");
+		posLoc = gl.glGetUniformLocation(shaders.get(rp), "light.position");
+		mambLoc = gl.glGetUniformLocation(shaders.get(rp), "material.ambient");
+		mdiffLoc = gl.glGetUniformLocation(shaders.get(rp), "material.diffuse");
+		mspecLoc = gl.glGetUniformLocation(shaders.get(rp), "material.specular");
+		mshiLoc = gl.glGetUniformLocation(shaders.get(rp), "material.shininess");
+	
+		//  set the uniform light and material values in the shader
+		gl.glProgramUniform4fv(shaders.get(rp), globalAmbLoc, 1, globalAmbient, 0);
+		gl.glProgramUniform4fv(shaders.get(rp), ambLoc, 1, lightAmbient, 0);
+		gl.glProgramUniform4fv(shaders.get(rp), diffLoc, 1, lightDiffuse, 0);
+		gl.glProgramUniform4fv(shaders.get(rp), specLoc, 1, lightSpecular, 0);
+		gl.glProgramUniform3fv(shaders.get(rp), posLoc, 1, lightPos, 0);
+		gl.glProgramUniform4fv(shaders.get(rp), mambLoc, 1, matAmb, 0);
+		gl.glProgramUniform4fv(shaders.get(rp), mdiffLoc, 1, matDif, 0);
+		gl.glProgramUniform4fv(shaders.get(rp), mspecLoc, 1, matSpe, 0);
+		gl.glProgramUniform1f(shaders.get(rp), mshiLoc, matShi);
+	}
+
+    public void renderMoonMap(int squareMoonTexture, int squareMoonHeight, int squareMoonNormalMap) {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_2D, squareMoonTexture);
+		gl.glActiveTexture(GL_TEXTURE1);
+		gl.glBindTexture(GL_TEXTURE_2D, squareMoonHeight);
+		gl.glActiveTexture(GL_TEXTURE2);
+		gl.glBindTexture(GL_TEXTURE_2D, squareMoonNormalMap);
+	
+		// gl.glClear(GL_DEPTH_BUFFER_BIT);
+		gl.glEnable(GL_DEPTH_TEST);
+		gl.glEnable(GL_CULL_FACE);
+		gl.glFrontFace(GL_CW);
+		gl.glDepthFunc(GL_LEQUAL);
+
+        // gl.glEnable(GL_CULL_FACE);
+		// gl.glFrontFace(GL_CCW);
+		// gl.glEnable(GL_DEPTH_TEST);
+        
+		gl.glPatchParameteri(GL_PATCH_VERTICES, 4);
+		gl.glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
+		gl.glDrawArraysInstanced(GL_PATCHES, 0, 4, 64*64);
+    }
+
 
    
 }
