@@ -105,13 +105,9 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 
 	
-	private int squareMoonTexture;
-	private int squareMoonHeight;
-	private int squareMoonNormalMap;
-
-	squareMoonTexture = Utils.loadTexture("squareMoonMap.jpg");
-	squareMoonHeight = Utils.loadTexture("squareMoonBump.jpg");
-	squareMoonNormalMap = Utils.loadTexture("squareMoonNormal.jpg");
+	// private int squareMoonTexture;
+	// private int squareMoonHeight;
+	// private int squareMoonNormalMap;
 
 
 	// VR stuff
@@ -121,11 +117,14 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	private float near = 0.01f;
 	private float far = 100.0f;
 	private int sizeX = 1920, sizeY = 1080;
+	
+	private boolean use3DAnaglyphs;
 
 	// **************** Constructor(s) ****************************
 	public Code() {	
 		numObjects = 13;
 		displayAxisLines = true;
+		use3DAnaglyphs = false;
 		renderer = new Renderer();
 
 		initTimeFrames();
@@ -234,8 +233,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	}
 
 	private void loadObjects() {
-		// dolphinObj = new ImportedModel("assets/models/dolphinHighPoly.obj");
-		// waterTankObj = new ImportedModel("assets/models/waterTank.obj");
 		chessBoardObj = new ImportedModel("assets/models/chess/Board_HalfSize2.obj");
 		
 		// Chess Pieces
@@ -243,9 +240,11 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		chessRookObj = new ImportedModel("assets/models/chess/Rook.obj");
 		
 		chessQueenObj = new ImportedModel("assets/models/chess/Queen2.obj");
-		// chessBishopObj = new ImportedModel("assets/models/chess/Bishop2.obj");
-		// chessKnightObj = new ImportedModel("assets/models/chess/Knight2.obj");
-		// chessPawnObj = new ImportedModel("assets/models/chess/Pawn.obj");
+
+		
+		chessBishopObj = new ImportedModel("assets/models/chess/Bishop2.obj");
+		chessKnightObj = new ImportedModel("assets/models/chess/Knight2.obj");
+		chessPawnObj = new ImportedModel("assets/models/chess/Pawn.obj");
 
 
 		// two Kings, two rooks
@@ -254,9 +253,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 	// refer to readme for source explanations
 	private void loadTextures() {
-		// dolTexture =  Utils.loadTexture("assets/textures/Dolphin_HighPolyUV.png");
 		skyboxTexture = Utils.loadCubeMap("assets/cubeMaps/space/red");
-		// waterTankTexture = Utils.loadTexture("assets/textures/water-tank/colour.png");
 		chessBoardTexture = Utils.loadTexture("assets/textures/chess/WoodenChessBoard_diffuse.jpg");
 		renderer.init3DMarbleTexture();
 	}
@@ -268,9 +265,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		geoSphere.setLocation(0f, 5f, 0f);
 
 		chessKingBlackGeom = new ChessPiece("chessPiece", chessKingObj);
-		// waterTankBox1 = new Cube("cube");
-		// dol = new Dolphin("dolphin", dolphinObj);
-		// waterTank = new WaterTank("waterTank", waterTankObj);
 
 		chessBoard = new ChessBoard("chessBoard", chessBoardObj);
 
@@ -287,8 +281,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	private void bindWorldObjects() {
 		renderer.bindWorldObject(skyboxCube, skyboxCube.getVertices());
 
-		// renderer.bindTexturedWorldObject(geoSphere, geoSphere.getVertices(), geoSphere.getTextureCoordinates(), geoSphere.getNormals());
-		renderer.bindTexturedWorldObject(chessKingBlackGeom, chessKingBlackGeom.getVertices(), chessKingBlackGeom.getTextureCoordinates(), chessKingBlackGeom.getNormals());
+		renderer.bindTexturedWorldObject(geoSphere, geoSphere.getVertices(), geoSphere.getTextureCoordinates(), geoSphere.getNormals());
+		// renderer.bindTexturedWorldObject(chessKingBlackGeom, chessKingBlackGeom.getVertices(), chessKingBlackGeom.getTextureCoordinates(), chessKingBlackGeom.getNormals());
 
 		renderer.bindTexturedWorldObject(chessBoard, chessBoard.getVertices(), chessBoard.getTextureCoordinates(), chessBoard.getNormals());
 		
@@ -308,22 +302,26 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		renderer.clearGL();
 		
-		renderer.anaglyphLeftColorMask();
-		scene(-1.0f);
-		
-		renderer.anaglyphRightColorMask();
-		scene(1.0f);
+		if(use3DAnaglyphs) {
+			anaglypsScene();
+		} else {
+			scene(); // the scene will will either load with 3D Anaglyphs or not
+		}
 	}
 
+	public void anaglypsScene() {
+		renderer.anaglyphLeftColorMask();
+		computePerspectiveMatrix(-1.0);
+		scene();
+		renderer.anaglyphRightColorMask();
+		computePerspectiveMatrix(1.0);
+		scene();
+	}
 	// ************************* Runtime Actions *************************
 	/** Renders on every frame and does actions */
-	public void scene(float leftRight) {
-
-		computePerspectiveMatrix(leftRight);
+	public void scene() {
 		// * View Matrix from Camera
 		vMat.set(camera.getViewMatrix());
-
-		// System.out.println(renderer.lightStatus());
 		
 		renderer.useCubeMapShader();
 		renderSkybox();
@@ -331,25 +329,20 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		renderer.useLineShader();
 		renderAxisLines();
 
-		
 		renderer.useLightDotShader();
 		renderLightDot();
 		
-		// renderer.useGeomSphereShader();
-		// renderGeomShere();
-		
 		renderer.prepPass1GLData();
 		renderer.useMainShadowShader();
-		// passOne();
 		renderWorldObjectsP1();		
 
 		renderer.prepPass2GLData();
 		renderer.useMainShader();
-		
 		renderer.setLightStatus();
-		// renderer.prepPass2GLData();
-
 		renderWorldObjectsP2();		
+
+		renderer.useGeomAddShader();
+		renderGeomShere();
 	}
 
 	private void renderSkybox() {
@@ -368,18 +361,18 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	}
 	
 	private void renderGeomShere() {
-		renderer.setGoldMaterial();
-		renderer.installLightsTo("sphereGeomShader");	
 		mMat.identity();
 		
 		// updateGeomSphere();
-		updateChessKingBlackGeom();
-
+		// updateChessKingBlackGeom();
+		updateGeomSphere();
+		renderer.setGoldMaterial();
+		renderer.installLights("geomAddShader");	
 		mMat.invert(invTrMat);
 		invTrMat.transpose(invTrMat);
 
-		renderer.setMVPUniformVars(mMat, pMat, vMat, invTrMat);
-		renderer.renderSphereGeomObject(chessKingBlackGeom.getVBOIndex(), chessKingBlackGeom.getNumVertices(), chessKingBlackGeom.getVBONIndex());
+		renderer.setMVPUniformVars(mMat, vMat, pMat, invTrMat);
+		renderer.renderGeomObject(geoSphere.getVBOIndex(), chessKingBlackGeom.getNumVertices(), chessKingBlackGeom.getVBONIndex());
 	}
 
 	private void updateGeomSphere() {
@@ -393,7 +386,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		geoSphere.setLocation(x, y, z);
 		
 		mMat.translation(x, y, z);
-		// mMat.scale(5f, 5f, 5f);
+		mMat.scale(5f, 5f, 5f);
 	}
 	private void updateChessKingBlackGeom() {
 		chessKingBlackGeom.update(elapsedTimeOffset);
@@ -406,7 +399,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		chessKingBlackGeom.setLocation(0f, 0f, 0f);
 		
 		mMat.translation(0f, 0f, 0f);
-		// mMat.scale(3.0f, 3.0f, 3.0f);
+		mMat.scale(3.0f, 3.0f, 3.0f);
 		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
 	}
 
@@ -432,12 +425,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		pass1CommonActions();
 		renderer.renderWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBONIndex());
 
-		// geom shader test
-		mMat.identity();
-		updateChessKingBlackGeom();
-		pass1CommonActions();
-		renderer.renderWorldObject(chessKingBlackGeom.getVBOIndex(), chessKingBlackGeom.getNumVertices(), chessKingBlackGeom.getVBONIndex());
-
 		mMat.identity();
 		updateChessRookWhite1();
 		pass1CommonActions();
@@ -457,24 +444,13 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		updateChessQueenBlack();
 		pass1CommonActions();
 		renderer.renderWorldObject(chessQueenBlack.getVBOIndex(), chessQueenBlack.getNumVertices(), chessQueenBlack.getVBONIndex());
-		
-
 	}
 
 	private void renderWorldObjectsP2() {
-		
-		
 		mMat.identity();
 		updateChessBoard();
 		pass2CommonActions();
 		renderer.renderWorldObjectFirst(chessBoard.getVBOIndex(), chessBoard.getNumVertices(), chessBoard.getVBOTxIndex(), chessBoardTexture, chessBoard.getVBONIndex());
-
-
-		// mMat.identity();
-		// updateGeomSphere();
-		// pass2CommonActions();
-		// renderer.renderWorldObject(geoSphere.getVBOIndex(), geoSphere.getNumVertices(), geoSphere.getVBONIndex());
-
 
 		renderer.setGoldMaterial();
 		renderer.setupLights(elapsedTimeOffset);	
@@ -489,15 +465,6 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		updateChessKingBlack();
 		pass2CommonActions();
 		renderer.renderTexturedMaterialWorldObject(chessKingBlack.getVBOIndex(), chessKingBlack.getNumVertices(), chessKingBlack.getVBOTxIndex(), renderer.get3DMarbleTexture2(), chessKingBlack.getVBONIndex());
-		
-		// geom shader test
-		renderer.setAmethystMaterial();
-		renderer.setupLights(elapsedTimeOffset);	
-		mMat.identity();
-		updateChessKingBlackGeom();
-		pass2CommonActions();
-		renderer.renderWorldObject(chessKingBlackGeom.getVBOIndex(), chessKingBlackGeom.getNumVertices(), chessKingBlackGeom.getVBONIndex());
-
 		
 		renderer.setGoldMaterial();
 		renderer.setupLights(elapsedTimeOffset);	
@@ -695,6 +662,11 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 				System.out.println("Space key pressed");
 				toggleAxisLinesAction();
 				break;
+			case KeyEvent.VK_Y:
+				System.out.println("Y key pressed");
+				toggle3DAnaglyphs();
+				break;
+			
 			case KeyEvent.VK_W:
 				System.out.println("W key pressed");
 				fwdBwdAction((float)elapsedTimeOffset);
@@ -809,11 +781,13 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 	public void toggleLightAction() { renderer.toggleLight(); }
 
+	private void toggle3DAnaglyphs() { use3DAnaglyphs = use3DAnaglyphs ? false : true;}
+
 	// **************** Main ****************************
 	public static void main(String[] args) { new Code(); }
 	
-	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
-	{	GL4 gl = (GL4) GLContext.getCurrentGL();
+	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {	
+		GL4 gl = (GL4) GLContext.getCurrentGL();
 
 		aspect = (float) myCanvas.getWidth() / (float) myCanvas.getHeight();
 		pMat.identity().setPerspective((float) Math.toRadians(60.0f), aspect, 0.1f, 1000.0f);

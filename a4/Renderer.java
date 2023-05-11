@@ -124,7 +124,7 @@ public class Renderer {
 		double sineValue = logistic(Math.abs(Math.sin(xyzValue * 3.14159 * veinFrequency)));
 		sineValue = Math.max(-1.0, Math.min(sineValue*1.25-0.20, 1.0));
 
-//		c = new Color(0.33f, 0.65f, (float)Math.min(sineValue*1.5-0.25, 1.0));
+        //	c = new Color(0.33f, 0.65f, (float)Math.min(sineValue*1.5-0.25, 1.0));
 		c = new Color((float)Math.min(sineValue*1.5-0.25, 1.0), 0.5f, 0.5f);
         
         
@@ -332,11 +332,11 @@ public class Renderer {
 
     private void createRenderingPrograms() {
         shaders.put("mainShader", Utils.createShaderProgram("assets/shaders/vertShader.glsl", "assets/shaders/fragShader.glsl"));
-        shaders.put("mainShadowShader", Utils.createShaderProgram("assets/shaders/vertShadowShader.glsl", "assets/shaders/fragShadowShader.glsl"));
-        shaders.put("sphereGeomShader", Utils.createShaderProgram("assets/shaders/sphere/sphereVertShader.glsl", "assets/shaders/sphere/sphereGeomShader.glsl", "assets/shaders/sphere/sphereFragShader.glsl"));
-        shaders.put("axisLineShader", Utils.createShaderProgram("assets/shaders/lineVertShader.glsl", "assets/shaders/lineFragShader.glsl"));
-        shaders.put("cubeMapShader", Utils.createShaderProgram("assets/shaders/cubeMapVertShader.glsl", "assets/shaders/cubeMapFragShader.glsl"));
-        shaders.put("lightDotShader", Utils.createShaderProgram("assets/shaders/lightDotVertShader.glsl", "assets/shaders/lightDotFragShader.glsl"));
+        shaders.put("mainShadowShader", Utils.createShaderProgram("assets/shaders/shadows/vertShader.glsl", "assets/shaders/shadows/fragShader.glsl"));
+        shaders.put("geomAddShader", Utils.createShaderProgram("assets/shaders/geom/vertShader.glsl", "assets/shaders/geom/geomShader.glsl", "assets/shaders/geom/fragShader.glsl"));
+        shaders.put("axisLineShader", Utils.createShaderProgram("assets/shaders/axisLines/vertShader.glsl", "assets/shaders/axisLines/fragShader.glsl"));
+        shaders.put("cubeMapShader", Utils.createShaderProgram("assets/shaders/cubemap/vertShader.glsl", "assets/shaders/cubemap/fragShader.glsl"));
+        shaders.put("lightDotShader", Utils.createShaderProgram("assets/shaders/lightDot/vertShader.glsl", "assets/shaders/lightDot/fragShader.glsl"));
     }
 
     private void setUpVertexArrayObjects() {
@@ -416,17 +416,15 @@ public class Renderer {
         // include a texture flag in order to use the correct material light properties
         glTextureStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "textureStatus");
         lightStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "lightStatus");
-
-        
     }
 
-    public void useGeomSphereShader() {
+    public void useGeomAddShader() {
         GL4 gl = (GL4) GLContext.getCurrentGL();
-        gl.glUseProgram(shaders.get("sphereGeomShader"));
-        mLoc = gl.glGetUniformLocation(shaders.get("sphereGeomShader"), "m_matrix");
-		vLoc = gl.glGetUniformLocation(shaders.get("sphereGeomShader"), "v_matrix");
-		pLoc = gl.glGetUniformLocation(shaders.get("sphereGeomShader"), "p_matrix");
-		nLoc = gl.glGetUniformLocation(shaders.get("sphereGeomShader"), "norm_matrix");
+        gl.glUseProgram(shaders.get("geomAddShader"));
+        mLoc = gl.glGetUniformLocation(shaders.get("geomAddShader"), "m_matrix");
+		vLoc = gl.glGetUniformLocation(shaders.get("geomAddShader"), "v_matrix");
+		pLoc = gl.glGetUniformLocation(shaders.get("geomAddShader"), "p_matrix");
+		nLoc = gl.glGetUniformLocation(shaders.get("geomAddShader"), "norm_matrix");
     }
 
     /**
@@ -516,7 +514,7 @@ public class Renderer {
     }
 
 
-    public void renderSphereGeomObject(int vboObjId, int numVertices, int vboNId) {
+    public void renderGeomObject(int vboObjId, int numVertices, int vboNId) {
         GL4 gl = (GL4) GLContext.getCurrentGL();
         
         gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
@@ -534,22 +532,6 @@ public class Renderer {
 		gl.glDepthFunc(GL_LEQUAL);
 
 		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
-
-        // gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
-		// gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-		// gl.glEnableVertexAttribArray(0);
-
-		// gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboNId]);
-		// gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
-		// gl.glEnableVertexAttribArray(1);
-
-		// gl.glEnable(GL_CULL_FACE);
-		// gl.glFrontFace(GL_CCW);
-		// gl.glEnable(GL_DEPTH_TEST);
-		// gl.glDepthFunc(GL_LEQUAL);
-
-		// gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[vboIdxId]);
-		// gl.glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
     }
     
     public void renderAlphaTexturedMaterialObject(int vboObjId,int numVertices, int vboTxId, int texture, int vboNId){
@@ -882,7 +864,7 @@ public class Renderer {
 
     // }
     // always set the materials, even if it is a very dim white for textured objs
-    public void installLightsTo(String renderingProgram) {	
+    public void installLights(String renderingProgram) {	
         GL4 gl = (GL4) GLContext.getCurrentGL();
 		
 		lightPos[0]=currentLightPos.x; lightPos[1]=currentLightPos.y; lightPos[2]=currentLightPos.z;
