@@ -68,7 +68,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 	
 	// private ImportedModel dolphinObj, waterTankObj;
-	private ImportedModel chessBoardObj, chessKingObj, chessQueenObj, chessBishopObj, chessKnightObj, chessRookObj, chessPawnObj;
+	private ImportedModel chessBoardObj, chessKingObj, chessQueenObj, chessRookObj, chessPawnObj;
 	private ImportedModel groundObj;
 	
 
@@ -229,10 +229,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		chessKingObj = new ImportedModel("assets/models/chess/King.obj");
 		chessRookObj = new ImportedModel("assets/models/chess/Rook.obj");
 		chessQueenObj = new ImportedModel("assets/models/chess/Queen2.obj");
-		chessBishopObj = new ImportedModel("assets/models/chess/Bishop2.obj");
-		chessKnightObj = new ImportedModel("assets/models/chess/Knight2.obj");
 		chessPawnObj = new ImportedModel("assets/models/chess/Pawn.obj");
-
 	}
 
 	// refer to readme for source explanations
