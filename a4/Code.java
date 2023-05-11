@@ -89,7 +89,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 
 	// ChessPieces for each side
 	// private ChessPiece chessKing1, chessQueen1, chessBishop1, chessKnight1, chessRook1, chessPawn1;
-	private ChessPiece chessKingWhite, chessKingBlack, chessRookWhite1, chessRookWhite2, chessQueenBlack, chessQueenWhite;
+	private ChessPiece chessKingWhite, chessKingBlack, chessRookWhite1, chessRookWhite2, chessQueenBlack, chessQueenWhite, envKingStatue;
 	// private ChessPiece chessKing2, chessQueen2, chessBishop2, chessKnight2, chessRook2, chessPawn2;
 	
 	// private int dolTexture, skyboxTexture, waterTankTexture;
@@ -123,7 +123,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		displayAxisLines = true;
 		renderer = new Renderer();
 		showTessMap = true;
-		showAnaglyphs = true;
+		showAnaglyphs = false;
 		showEnvMapping = true;
 
 		initTimeFrames();
@@ -280,6 +280,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		chessRookWhite1 = new ChessPiece("chessPiece", chessRookObj);
 		chessRookWhite2 = new ChessPiece("chessPiece", chessRookObj);
+
+		envKingStatue = new ChessPiece("chessPiece", chessKingObj);
 		// chessKing1.setLocation(0.0f, 0.0f, 0.0f);
 
 		// chessQueen1 = new ChessPiece("chessPiece", chessQueenObj);
@@ -309,6 +311,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		renderer.bindTexturedWorldObject(chessKingWhite, chessKingWhite.getVertices(), chessKingWhite.getTextureCoordinates(), chessKingWhite.getNormals());
 		renderer.bindTexturedWorldObject(chessKingBlack, chessKingBlack.getVertices(), chessKingBlack.getTextureCoordinates(), chessKingBlack.getNormals());
+
+		renderer.bindTexturedWorldObject(envKingStatue, envKingStatue.getVertices(), envKingStatue.getTextureCoordinates(), envKingStatue.getNormals());
 
         renderer.bindTexturedWorldObject(chessQueenBlack, chessQueenBlack.getVertices(), chessQueenBlack.getTextureCoordinates(), chessQueenBlack.getNormals());
 		renderer.bindTexturedWorldObject(chessQueenWhite, chessQueenWhite.getVertices(), chessQueenWhite.getTextureCoordinates(), chessQueenWhite.getNormals());
@@ -353,6 +357,11 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		
 		renderer.useCubeMapShader();
 		renderSkybox();
+		
+		if(showEnvMapping) {
+			renderer.useEnvMapShader();
+			renderEnvStatue();
+		}
 		
 		renderer.useLineShader();
 		renderAxisLines();
@@ -413,6 +422,36 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		renderer.renderMoonMap(squareMoonTexture, squareMoonHeight, squareMoonNormalMap);
 	}
 	
+	private void renderEnvStatue() {
+		renderer.setGoldMaterial();
+		renderer.setupLights(elapsedTimeOffset);	
+		mMat.identity();
+		updateChessKingStatue();
+
+		mMat.invert(invTrMat);
+		invTrMat.transpose(invTrMat);
+		
+		renderer.setMVPUniformVars(mMat,vMat,pMat,invTrMat);
+		renderer.renderEnvMappedWorldObject(envKingStatue.getVBOIndex(), envKingStatue.getNumVertices(), envKingStatue.getVBOTxIndex(), skyboxTexture, envKingStatue.getVBONIndex());
+
+	}
+
+	private void updateChessKingStatue() {
+		envKingStatue.update(elapsedTimeOffset);
+		currObjLoc = envKingStatue.getLocation();
+
+		x = currObjLoc.x();
+		y = currObjLoc.y();
+		z = currObjLoc.z();
+		
+		envKingStatue.setLocation(x, y, z);
+		
+		mMat.translation(x, y, z);
+		mMat.scale(3f);
+		// mMat.scale(0.75f, 0.75f, 0.75f);
+		// mMat.rotate((float)Math.toRadians(90.0f),0.0f, 1.0f, 0.0f);
+
+	}
 
 	// TODO: change the renderer and display so that objects go through both passOne and passTwo 
 	// TODO: create an update for eadch object separately so that updates to an object's position only occurs once per round
@@ -468,7 +507,8 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		updateChessKingWhite();
 		pass2CommonActions();
 		renderer.renderTexturedMaterialWorldObject(chessKingWhite.getVBOIndex(), chessKingWhite.getNumVertices(), chessKingWhite.getVBOTxIndex(), renderer.get3DMarbleTexture1(), chessKingWhite.getVBONIndex());
-		
+
+
 		renderer.setAmethystMaterial();
 		renderer.setupLights(elapsedTimeOffset);	
 		mMat.identity();

@@ -323,6 +323,7 @@ public class Renderer {
 
     private void createRenderingPrograms() {
         shaders.put("mainShader", Utils.createShaderProgram("assets/shaders/vertShader.glsl", "assets/shaders/fragShader.glsl"));
+        shaders.put("envMapShader", Utils.createShaderProgram("assets/shaders/envMapVertShader.glsl", "assets/shaders/envMapFragShader.glsl"));
         shaders.put("moonMapShader", Utils.createShaderProgram("assets/shaders/tessVertShader.glsl", "assets/shaders/tessCShader.glsl", "assets/shaders/tessEShader.glsl", "assets/shaders/tessFragShader.glsl"));
         shaders.put("mainShadowShader", Utils.createShaderProgram("assets/shaders/vertShadowShader.glsl", "assets/shaders/fragShadowShader.glsl"));
         shaders.put("axisLineShader", Utils.createShaderProgram("assets/shaders/lineVertShader.glsl", "assets/shaders/lineFragShader.glsl"));
@@ -407,6 +408,15 @@ public class Renderer {
 		nLoc = gl.glGetUniformLocation(shaders.get("moonMapShader"), "norm_matrix");
     }
 
+    public void useEnvMapShader() {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+        gl.glUseProgram(shaders.get("envMapShader"));
+
+        mLoc = gl.glGetUniformLocation(shaders.get("envMapShader"), "m_matrix");
+		vLoc = gl.glGetUniformLocation(shaders.get("envMapShader"), "v_matrix");
+		pLoc = gl.glGetUniformLocation(shaders.get("envMapShader"), "p_matrix");
+		nLoc = gl.glGetUniformLocation(shaders.get("envMapShader"), "norm_matrix");
+    }
     /**
      * THis method will init the cubemap shader program ofrendering the scene
      */
@@ -905,8 +915,38 @@ public class Renderer {
 		// gl.glEnable(GL_DEPTH_TEST);
         
 		gl.glPatchParameteri(GL_PATCH_VERTICES, 4);
-		gl.glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
+		gl.glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		gl.glDrawArraysInstanced(GL_PATCHES, 0, 4, 64*64);
+    }
+
+    public void renderEnvMappedWorldObject(int vboObjId,int numVertices, int vboTxId, int texture, int vboNId) {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        // gl.glUniform1i(glTextureStatus, 2);
+
+		gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboObjId]);
+		gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(0);
+
+		// gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboTxId]);
+		// gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		// gl.glEnableVertexAttribArray(1);
+        
+        
+        gl.glBindBuffer(GL_ARRAY_BUFFER, vbo[vboNId]);
+		gl.glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
+		gl.glEnableVertexAttribArray(1);
+        
+		gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+        
+		gl.glEnable(GL_CULL_FACE);
+		gl.glFrontFace(GL_CCW);
+		gl.glEnable(GL_DEPTH_TEST);
+		gl.glDepthFunc(GL_LEQUAL);
+
+
+		gl.glDrawArrays(GL_TRIANGLES, 0, numVertices);
     }
 
 
