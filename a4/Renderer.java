@@ -280,6 +280,20 @@ public class Renderer {
         matShi = Utils.whiteShininess();
     }
 
+    public void setMoonMaterial() {
+        matAmb = Utils.moonAmbient();
+        matDif = Utils.moonDiffuse();
+        matSpe = Utils.moonSpecular();
+        matShi = Utils.moonShininess();
+    }
+
+    public void setColorfulStarMaterial() {
+        matAmb = Utils.colorfulStarAmbient();
+        matDif = Utils.colorfulStarDiffuse();
+        matSpe = Utils.colorfulStarSpecular();
+        matShi = Utils.colorfulStarShininess();
+    }
+
     public void setDefaultMaterial() { setNeutralWhiteMaterial(); }
 
     // ****************************** Initialization ******************************
@@ -334,6 +348,7 @@ public class Renderer {
         shaders.put("mainShader", Utils.createShaderProgram("assets/shaders/vertShader.glsl", "assets/shaders/fragShader.glsl"));
         shaders.put("mainShadowShader", Utils.createShaderProgram("assets/shaders/shadows/vertShader.glsl", "assets/shaders/shadows/fragShader.glsl"));
         shaders.put("geomAddShader", Utils.createShaderProgram("assets/shaders/geom/vertShader.glsl", "assets/shaders/geom/geomShader.glsl", "assets/shaders/geom/fragShader.glsl"));
+        shaders.put("moonMapShader", Utils.createShaderProgram("assets/shaders/tess/vertShader.glsl", "assets/shaders/tess/tessCShader.glsl", "assets/shaders/tess/tessEShader.glsl", "assets/shaders/tess/fragShader.glsl"));
         shaders.put("axisLineShader", Utils.createShaderProgram("assets/shaders/axisLines/vertShader.glsl", "assets/shaders/axisLines/fragShader.glsl"));
         shaders.put("cubeMapShader", Utils.createShaderProgram("assets/shaders/cubemap/vertShader.glsl", "assets/shaders/cubemap/fragShader.glsl"));
         shaders.put("lightDotShader", Utils.createShaderProgram("assets/shaders/lightDot/vertShader.glsl", "assets/shaders/lightDot/fragShader.glsl"));
@@ -398,8 +413,6 @@ public class Renderer {
         sLoc = gl.glGetUniformLocation(shaders.get("mainShadowShader"), "shadowMVP");
     }
 
-
-
     /**
      * THis method will init the main shader program uniform data of rendering the scene
      */
@@ -416,6 +429,18 @@ public class Renderer {
         // include a texture flag in order to use the correct material light properties
         glTextureStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "textureStatus");
         lightStatus = gl.glGetUniformLocation(shaders.get("mainShader"), "lightStatus");
+
+        
+    }
+
+    public void useTessShader() {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+        gl.glUseProgram(shaders.get("moonMapShader"));
+
+        mLoc = gl.glGetUniformLocation(shaders.get("moonMapShader"), "m_matrix");
+		vLoc = gl.glGetUniformLocation(shaders.get("moonMapShader"), "v_matrix");
+		pLoc = gl.glGetUniformLocation(shaders.get("moonMapShader"), "p_matrix");
+		nLoc = gl.glGetUniformLocation(shaders.get("moonMapShader"), "norm_matrix");
     }
 
     public void useGeomAddShader() {
@@ -923,6 +948,32 @@ public class Renderer {
 		gl.glProgramUniform4fv(shaders.get("mainShader"), mspecLoc, 1, matSpe, 0);
 		gl.glProgramUniform1f(shaders.get("mainShader"), mshiLoc, matShi);
 	}
+
+    public void renderMoonMap(int squareMoonTexture, int squareMoonHeight, int squareMoonNormalMap) {
+        GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        gl.glActiveTexture(GL_TEXTURE0);
+		gl.glBindTexture(GL_TEXTURE_2D, squareMoonTexture);
+		gl.glActiveTexture(GL_TEXTURE1);
+		gl.glBindTexture(GL_TEXTURE_2D, squareMoonHeight);
+		gl.glActiveTexture(GL_TEXTURE2);
+		gl.glBindTexture(GL_TEXTURE_2D, squareMoonNormalMap);
+	
+		// gl.glClear(GL_DEPTH_BUFFER_BIT);
+		gl.glEnable(GL_DEPTH_TEST);
+		gl.glEnable(GL_CULL_FACE);
+		gl.glFrontFace(GL_CW);
+		gl.glDepthFunc(GL_LEQUAL);
+
+        // gl.glEnable(GL_CULL_FACE);
+		// gl.glFrontFace(GL_CCW);
+		// gl.glEnable(GL_DEPTH_TEST);
+        
+		gl.glPatchParameteri(GL_PATCH_VERTICES, 4);
+		gl.glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		gl.glDrawArraysInstanced(GL_PATCHES, 0, 4, 64*64);
+    }
+
 
    
 }

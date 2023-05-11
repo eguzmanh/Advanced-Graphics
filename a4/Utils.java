@@ -404,4 +404,14 @@ public class Utils
 	public static float[] amethystDiffuse()  { return (new float [] {0.8f, 0.8f, 0.8f, 1} ); } // a bright white color for the reflective highlights.
 	public static float[] amethystSpecular() { return (new float [] {0.3f, 0.3f, 0.3f, 1} ); } // a darker shade of purple to simulate ambient lighting.
 	public static float amethystShininess()  { return 128f; } // a high value for a smooth, polished appearance.
+
+	public static float[] moonAmbient() { return new float[] {0.1f, 0.1f, 0.1f, 1.0f}; }
+	public static float[] moonDiffuse() { return new float[] {0.8f, 0.8f, 0.8f, 1.0f}; }
+	public static float[] moonSpecular() { return new float[] {0.2f, 0.2f, 0.2f, 1.0f}; }
+	public static float moonShininess() { return 8.0f; }
+
+	public static float[] colorfulStarAmbient() { return new float[] {0.1f, 0.1f, 0.1f, 1.0f}; }
+	public static float[] colorfulStarDiffuse() { return new float[] {1.0f, 0.9f, 0.1f, 1.0f}; }
+	public static float[] colorfulStarSpecular() { return new float[] {1.0f, 1.0f, 1.0f, 1.0f}; }
+	public static float colorfulStarShininess() { return 50.0f; }
 }
