@@ -70,7 +70,7 @@ public class Renderer {
 
     public Renderer() {
         vao = new int[3];
-        vbo = new int[25];  
+        vbo = new int[28];  
         lightPos = new float[3];
 
         initialLightLoc = new Vector3f(2.0f, 7f, 2f);
@@ -803,6 +803,10 @@ public class Renderer {
         installLights();
     }
 
+    public void setupLights(float elapsedSpeed, String renderingProgram) {
+        installLights(renderingProgram);
+    }
+
     public void prepPass1GLData() {
         GL4 gl = (GL4) GLContext.getCurrentGL();
         gl.glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer[0]);
@@ -864,7 +868,7 @@ public class Renderer {
 
     // }
     // always set the materials, even if it is a very dim white for textured objs
-    public void installLights(String renderingProgram) {	
+    private void installLights(String renderingProgram) {	
         GL4 gl = (GL4) GLContext.getCurrentGL();
 		
 		lightPos[0]=currentLightPos.x; lightPos[1]=currentLightPos.y; lightPos[2]=currentLightPos.z;
