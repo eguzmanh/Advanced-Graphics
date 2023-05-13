@@ -55,6 +55,11 @@ public class Renderer {
 	float[] amethystMatDif = Utils.amethystDiffuse();
 	float[] amethystMatSpe = Utils.amethystSpecular();
     float amethystMatShi = Utils.amethystShininess();
+
+     float[] fieryMatAmb = Utils.fieryAmbient();
+	float[] fieryMatDif = Utils.fieryDiffuse();
+	float[] fieryMatSpe = Utils.fierySpecular();
+    float fieryMatShi = Utils.fieryShininess();
     
     private Vector3f initialLightLoc, currentLightPos;
     private float[] lightPos;
@@ -285,6 +290,13 @@ public class Renderer {
         matDif = Utils.moonDiffuse();
         matSpe = Utils.moonSpecular();
         matShi = Utils.moonShininess();
+    }
+
+    public void setFieryMaterial() {
+        matAmb = Utils.fieryAmbient();
+        matDif = Utils.fieryDiffuse();
+        matSpe = Utils.fierySpecular();
+        matShi = Utils.fieryShininess();
     }
 
     public void setColorfulStarMaterial() {

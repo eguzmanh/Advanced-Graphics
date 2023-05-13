@@ -101,10 +101,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	// VR stuff
 	// chnange the IOD value to enhance the distance between the red and cyan output of the renderer
 	// 2.5 seeems to work with this program ti render the scene in the red/cyan glasses
-	private float IOD = 2.5f;  // tunable interocular distance � we arrived at 0.01 for this scene by trial-and-error
+	private float IOD = 8f;  // tunable interocular distance � we arrived at 0.01 for this scene by trial-and-error
 	private float near = 0.01f;
-	private float far = 100.0f;
-	private int sizeX = 1300, sizeY = 1100;
+	private float far = 500.0f;
+	private int sizeX = 1500, sizeY = 1000;
 	
 	private boolean showTessMap, showAnaglyphs;
 
@@ -337,10 +337,10 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		renderer.setLightStatus();
 		renderWorldObjectsP2();		
 
-		if(!showAnaglyphs) {
+		// if(!showAnaglyphs) {
 			renderer.useGeomAddShader();
 			renderGeomWorldObjects();
-		}
+		// }
 	}
 
 	private void renderSkybox() {
@@ -364,7 +364,7 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 		mMat.identity();
 		mMat.translate(0f, 0f, 0f);
 
-		mMat.scale(75f);
+		mMat.scale(100f);
 		
 		mMat.invert(invTrMat);
 		invTrMat.transpose(invTrMat);
@@ -374,14 +374,14 @@ public class Code extends JFrame implements GLEventListener, KeyListener, MouseM
 	}
 
 	private void renderGeomWorldObjects() {
-		renderer.setColorfulStarMaterial();
+		renderer.setFieryMaterial();
 		renderer.setupLights(elapsedTimeOffset, "geomAddShader");	
 		mMat.identity();
 		updateGeomChessKing();
 		geomCommonActions();
 		renderer.renderGeomObject(geomChessKing.getVBOIndex(), geomChessKing.getNumVertices(), geomChessKing.getVBONIndex());
 
-		renderer.setColorfulStarMaterial();
+		renderer.setFieryMaterial();
 		renderer.setupLights(elapsedTimeOffset, "geomAddShader");	
 		mMat.identity();
 		updateGeomChessPawn();

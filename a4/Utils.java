@@ -414,4 +414,9 @@ public class Utils
 	public static float[] colorfulStarDiffuse() { return new float[] {1.0f, 0.9f, 0.1f, 1.0f}; }
 	public static float[] colorfulStarSpecular() { return new float[] {1.0f, 1.0f, 1.0f, 1.0f}; }
 	public static float colorfulStarShininess() { return 50.0f; }
+
+	public static float[] fieryAmbient() { return new float[] {1.0f, 0.3f, 0.0f, 1.0f}; } // Bright, saturated orange 
+	public static float[] fieryDiffuse() { return new float[] {1.0f, 0.3f, 0.0f, 1.0f}; }  // Same as ambient for a consistent color
+	public static float[] fierySpecular() { return new float[] {1.0f, 0.6f, 0.0f, 1.0f}; } // Lighter, more yellowish-orange
+	public static float fieryShininess() { return 50.0f; } // Medium to high shininess for sharp, defined specular highlights
 }

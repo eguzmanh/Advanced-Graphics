@@ -20,6 +20,9 @@ uniform mat4 p_matrix;
 uniform mat4 norm_matrix;
 /*-----------------*/
 
+
+
+
 void main(void)
 {	vec2 patchTexCoords[] =
 		vec2[] (vec2(0,0), vec2(1,0), vec2(0,1), vec2(1,1));

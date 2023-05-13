@@ -20,6 +20,7 @@ uniform mat4 p_matrix;
 uniform mat4 norm_matrix;
 out vec3 varyingVertPos;
 out vec3 varyingLightDir; 
+out vec3 vertEyeSpacePos;
 /*-----------------*/
 
 in vec2 tcs_out[];
@@ -36,6 +37,7 @@ void main (void)
 	// add the height from the height map to the vertex:
 	tessellatedPoint.y += (texture(tex_height, tc).r) / 60.0;
 	
+	vertEyeSpacePos = (v_matrix * m_matrix * tessellatedPoint).xyz; 
 	gl_Position = p_matrix * v_matrix * m_matrix * tessellatedPoint;
 	tes_out = tc;
 	

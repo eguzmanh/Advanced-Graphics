@@ -1,6 +1,8 @@
 #version 430
 
 layout (location = 0) in vec3 position;
+
+out vec3 vertEyeSpacePos;
 out vec3 tc;
 
 uniform mat4 v_matrix;
@@ -11,5 +13,7 @@ void main(void)
 {
 	tc = position;
 	mat4 v3_matrix = mat4(mat3(v_matrix));
+
+	vertEyeSpacePos = (v_matrix * vec4(position,1.0)).xyz;
 	gl_Position = p_matrix * v3_matrix * vec4(position,1.0);
 }
